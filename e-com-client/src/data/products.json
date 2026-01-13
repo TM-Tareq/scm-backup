@@ -1,0 +1,902 @@
+[
+ 
+  {
+    "id": 1,
+    "name": "LG 1.5 Ton 5 Star Dual Inverter Split AC",
+    "price": 579.99,
+    "category": "Air Conditioner",
+    "image": "https://m.media-amazon.com/images/I/61mIVeQaqXL._AC_SL1500_.jpg",
+    "description": "AI Convertible 6-in-1 cooling with anti-virus protection.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 2,
+    "name": "Daikin 1.5 Ton 5 Star Inverter Split AC",
+    "price": 619.99,
+    "category": "Air Conditioner",
+    "image": "https://m.media-amazon.com/images/I/61fKbIxWKaL._AC_SL1500_.jpg",
+    "description": "3D airflow with Coanda technology for uniform cooling.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 3,
+    "name": "Voltas 1 Ton 3 Star Inverter Split AC",
+    "price": 399.99,
+    "category": "Air Conditioner",
+    "image": "https://m.media-amazon.com/images/I/71qZfP3ryJL._AC_SL1500_.jpg",
+    "description": "High ambient cooling even at 52°C.",
+    "inStock": true,
+    "rating": 4.4
+  },
+  {
+    "id": 4,
+    "name": "Carrier 1.5 Ton 5 Star Inverter Split AC",
+    "price": 599.99,
+    "category": "Air Conditioner",
+    "image": "https://m.media-amazon.com/images/I/71nN5dE1yRL._AC_SL1500_.jpg",
+    "description": "Flexicool inverter with 6-in-1 convertible modes.",
+    "inStock": false,
+    "rating": 4.5
+  },
+  {
+    "id": 5,
+    "name": "Panasonic 1 Ton 5 Star Wi-Fi Inverter Split AC",
+    "price": 489.99,
+    "category": "Air Conditioner",
+    "image": "https://m.media-amazon.com/images/I/61Qb0+4qWLL._AC_SL1500_.jpg",
+    "description": "Smart control with Alexa and Google Assistant.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 6,
+    "name": "Blue Star 1.2 Ton 3 Star Fixed Speed Window AC",
+    "price": 329.99,
+    "category": "Air Conditioner",
+    "image": "https://m.media-amazon.com/images/I/71cJ4Z2qWBL._AC_SL1500_.jpg",
+    "description": "Eco-friendly and energy efficient window unit.",
+    "inStock": true,
+    "rating": 4.3
+  },
+  {
+    "id": 7,
+    "name": "Samsung 1.5 Ton 4 Star Inverter Split AC",
+    "price": 549.99,
+    "category": "Air Conditioner",
+    "image": "https://m.media-amazon.com/images/I/71VpdwN4iQL._AC_SL1500_.jpg",
+    "description": "WindFree cooling with digital inverter technology.",
+    "inStock": true,
+    "rating": 4.5
+  },
+  {
+    "id": 8,
+    "name": "Godrej 1 Ton 5 Star Inverter Split AC",
+    "price": 429.99,
+    "category": "Air Conditioner",
+    "image": "https://m.media-amazon.com/images/I/71k0mZ8g1nL._AC_SL1500_.jpg",
+    "description": "5-in-1 convertible cooling with anti-dust filter.",
+    "inStock": true,
+    "rating": 4.4
+  },
+
+
+  {
+    "id": 9,
+    "name": "Sony WH-1000XM5 Wireless Headphones",
+    "price": 399.99,
+    "category": "Headphone",
+    "image": "https://m.media-amazon.com/images/I/61J9B8X3C-L._AC_SL1500_.jpg",
+    "description": "Industry-leading noise cancellation with premium sound quality.",
+    "inStock": true,
+    "rating": 4.9
+  },
+  {
+    "id": 10,
+    "name": "Bose QuietComfort Ultra Headphones",
+    "price": 349.99,
+    "category": "Headphone",
+    "image": "https://m.media-amazon.com/images/I/51Q7Xq4R+RL._AC_SL1500_.jpg",
+    "description": "Immersive audio with spatial sound and adaptive ANC.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 11,
+    "name": "Apple AirPods Max",
+    "price": 549.99,
+    "category": "Headphone",
+    "image": "https://m.media-amazon.com/images/I/71L2iBSyyOL._AC_SL1500_.jpg",
+    "description": "High-fidelity audio with active noise cancellation.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 12,
+    "name": "Sennheiser Momentum 4 Wireless",
+    "price": 379.99,
+    "category": "Headphone",
+    "image": "https://m.media-amazon.com/images/I/61s6QZNXzDL._AC_SL1500_.jpg",
+    "description": "60-hour battery life with adaptive noise cancellation.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 13,
+    "name": "Beats Studio Pro",
+    "price": 349.99,
+    "category": "Headphone",
+    "image": "https://m.media-amazon.com/images/I/61ubS2C9zPL._AC_SL1500_.jpg",
+    "description": "Personalized spatial audio with head tracking.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 14,
+    "name": "JBL Tune 760NC",
+    "price": 129.99,
+    "category": "Headphone",
+    "image": "https://m.media-amazon.com/images/I/61Q0IsqDPPL._AC_SL1500_.jpg",
+    "description": "Adaptive noise cancelling with 50-hour battery life.",
+    "inStock": true,
+    "rating": 4.5
+  },
+  {
+    "id": 15,
+    "name": "boAt Rockerz 550",
+    "price": 79.99,
+    "category": "Headphone",
+    "image": "https://m.media-amazon.com/images/I/61uG7mW4PPL._AC_SL1500_.jpg",
+    "description": "Powerful 50mm drivers with physical noise isolation.",
+    "inStock": true,
+    "rating": 4.4
+  },
+  {
+    "id": 16,
+    "name": "Sony WF-1000XM5 True Wireless Earbuds",
+    "price": 299.99,
+    "category": "Headphone",
+    "image": "https://m.media-amazon.com/images/I/61olV0nM3EL._AC_SL1500_.jpg",
+    "description": "Best-in-class noise cancellation in true wireless form.",
+    "inStock": true,
+    "rating": 4.8
+  },
+
+
+  {
+    "id": 17,
+    "name": "iPhone 16 Pro Max",
+    "price": 1399.99,
+    "category": "Mobile",
+    "image": "https://m.media-amazon.com/images/I/71JqzGsZiPL._AC_SL1500_.jpg",
+    "description": "A18 Pro chip, 48MP fusion camera system.",
+    "inStock": true,
+    "rating": 4.9
+  },
+  {
+    "id": 18,
+    "name": "Samsung Galaxy S24 Ultra",
+    "price": 1299.99,
+    "category": "Mobile",
+    "image": "https://m.media-amazon.com/images/I/71CZ2j5C0PL._AC_SL1500_.jpg",
+    "description": "200MP camera, built-in S Pen.",
+    "inStock": true,
+    "rating": 4.9
+  },
+  {
+    "id": 19,
+    "name": "Google Pixel 9 Pro",
+    "price": 999.99,
+    "category": "Mobile",
+    "image": "https://m.media-amazon.com/images/I/81s9f4M6+PL._AC_SL1500_.jpg",
+    "description": "Best Android camera with advanced AI features.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 20,
+    "name": "OnePlus 13",
+    "price": 899.99,
+    "category": "Mobile",
+    "image": "https://m.media-amazon.com/images/I/71uJ8Uy-0NL._AC_SL1500_.jpg",
+    "description": "Snapdragon 8 Elite, 120Hz LTPO display.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 21,
+    "name": "Xiaomi 14 Ultra",
+    "price": 1099.99,
+    "category": "Mobile",
+    "image": "https://m.media-amazon.com/images/I/71i2XhHU3PL._AC_SL1500_.jpg",
+    "description": "Leica co-engineered quad camera system.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 22,
+    "name": "Vivo X100 Pro",
+    "price": 949.99,
+    "category": "Mobile",
+    "image": "https://m.media-amazon.com/images/I/71r0qa1G0gL._AC_SL1500_.jpg",
+    "description": "Zeiss optics with 1-inch main sensor.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 23,
+    "name": "Realme GT 7 Pro",
+    "price": 599.99,
+    "category": "Mobile",
+    "image": "https://m.media-amazon.com/images/I/71Zf9uUp+GL._AC_SL1500_.jpg",
+    "description": "Flagship performance with 6500mAh battery.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 24,
+    "name": "Nothing Phone (3)",
+    "price": 799.99,
+    "category": "Mobile",
+    "image": "https://m.media-amazon.com/images/I/71sV8M0V5-L._AC_SL1500_.jpg",
+    "description": "Unique Glyph interface with clean Android experience.",
+    "inStock": true,
+    "rating": 4.7
+  },
+
+
+  {
+    "id": 25,
+    "name": "Apple MacBook Pro 16 M4 Pro",
+    "price": 2499.99,
+    "category": "Laptop",
+    "image": "https://m.media-amazon.com/images/I/71YRSQX1JTL._AC_SL1500_.jpg",
+    "description": "Most powerful MacBook with M4 Pro chip.",
+    "inStock": true,
+    "rating": 4.9
+  },
+  {
+    "id": 26,
+    "name": "Dell XPS 14 (2025)",
+    "price": 1899.99,
+    "category": "Laptop",
+    "image": "https://m.media-amazon.com/images/I/71uN6wMFD7L._AC_SL1500_.jpg",
+    "description": "Ultra-thin bezels with OLED display option.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 27,
+    "name": "ASUS ROG Zephyrus G14",
+    "price": 1699.99,
+    "category": "Laptop",
+    "image": "https://m.media-amazon.com/images/I/81l2q7y3tQL._AC_SL1500_.jpg",
+    "description": "Compact gaming laptop with RTX 4070.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 28,
+    "name": "Lenovo ThinkPad X1 Carbon Gen 12",
+    "price": 1799.99,
+    "category": "Laptop",
+    "image": "https://m.media-amazon.com/images/I/71xWn9wxxaL._AC_SL1500_.jpg",
+    "description": "Business laptop with legendary keyboard.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 29,
+    "name": "HP Spectre x360 14",
+    "price": 1499.99,
+    "category": "Laptop",
+    "image": "https://m.media-amazon.com/images/I/71tI81R3t0L._AC_SL1500_.jpg",
+    "description": "2-in-1 convertible with OLED touch display.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 30,
+    "name": "Microsoft Surface Laptop 7",
+    "price": 1299.99,
+    "category": "Laptop",
+    "image": "https://m.media-amazon.com/images/I/71d3uR7qNPL._AC_SL1500_.jpg",
+    "description": "Snapdragon X Elite powered Copilot+ PC.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 31,
+    "name": "Acer Swift Go 14",
+    "price": 899.99,
+    "category": "Laptop",
+    "image": "https://m.media-amazon.com/images/I/71p3W7v7hQL._AC_SL1500_.jpg",
+    "description": "Lightweight with Intel Core Ultra processor.",
+    "inStock": true,
+    "rating": 4.5
+  },
+  {
+    "id": 32,
+    "name": "MSI Creator Z17 HX Studio",
+    "price": 2999.99,
+    "category": "Laptop",
+    "image": "https://m.media-amazon.com/images/I/81i1lJ0V+PL._AC_SL1500_.jpg",
+    "description": "Professional creator laptop with RTX 4090.",
+    "inStock": true,
+    "rating": 4.8
+  },
+
+
+  {
+    "id": 33,
+    "name": "Apple Mac Studio M2 Ultra",
+    "price": 3999.99,
+    "category": "Desktop",
+    "image": "https://m.media-amazon.com/images/I/61bP5I8Y0GL._AC_SL1500_.jpg",
+    "description": "Ultra-powerful desktop for professionals.",
+    "inStock": true,
+    "rating": 4.9
+  },
+  {
+    "id": 34,
+    "name": "Dell Alienware Aurora R16",
+    "price": 2499.99,
+    "category": "Desktop",
+    "image": "https://m.media-amazon.com/images/I/71pVJ+80oQL._AC_SL1500_.jpg",
+    "description": "High-performance gaming desktop with liquid cooling.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 35,
+    "name": "HP Omen 45L",
+    "price": 2199.99,
+    "category": "Desktop",
+    "image": "https://m.media-amazon.com/images/I/71wWYg1o1GL._AC_SL1500_.jpg",
+    "description": "Easy upgrade gaming PC with RGB lighting.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 36,
+    "name": "Lenovo Legion Tower 7i",
+    "price": 2299.99,
+    "category": "Desktop",
+    "image": "https://m.media-amazon.com/images/I/81e9mV4Qd+L._AC_SL1500_.jpg",
+    "description": "Intel Core i9 with RTX 4080.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 37,
+    "name": "Corsair Vengeance i7500",
+    "price": 2699.99,
+    "category": "Desktop",
+    "image": "https://m.media-amazon.com/images/I/81n9m6X2WLL._AC_SL1500_.jpg",
+    "description": "Pre-built with latest components.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 38,
+    "name": "iBUYPOWER SlateMesh Gaming PC",
+    "price": 1399.99,
+    "category": "Desktop",
+    "image": "https://m.media-amazon.com/images/I/81Yb3A4N4nL._AC_SL1500_.jpg",
+    "description": "Budget-friendly RTX 4060 gaming desktop.",
+    "inStock": true,
+    "rating": 4.5
+  },
+  {
+    "id": 39,
+    "name": "CyberPowerPC Gamer Xtreme",
+    "price": 1199.99,
+    "category": "Desktop",
+    "image": "https://m.media-amazon.com/images/I/81G5L7fW5BL._AC_SL1500_.jpg",
+    "description": "Solid 1080p/1440p gaming performance.",
+    "inStock": true,
+    "rating": 4.4
+  },
+  {
+    "id": 40,
+    "name": "Skytech Chronos Gaming PC",
+    "price": 1599.99,
+    "category": "Desktop",
+    "image": "https://m.media-amazon.com/images/I/81k5qMZaQvL._AC_SL1500_.jpg",
+    "description": "RTX 4070 with Ryzen 7 processor.",
+    "inStock": true,
+    "rating": 4.6
+  },
+
+  {
+    "id": 41,
+    "name": "Apple Watch Ultra 2",
+    "price": 799.99,
+    "category": "Smartwatch",
+    "image": "https://m.media-amazon.com/images/I/71rD1qO6YkL._AC_SL1500_.jpg",
+    "description": "Rugged design with advanced fitness tracking.",
+    "inStock": true,
+    "rating": 4.9
+  },
+  {
+    "id": 42,
+    "name": "Samsung Galaxy Watch 7",
+    "price": 349.99,
+    "category": "Smartwatch",
+    "image": "https://m.media-amazon.com/images/I/61Q4qAkE6tL._AC_SL1500_.jpg",
+    "description": "Wear OS with advanced health sensors.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 43,
+    "name": "Garmin Fenix 8",
+    "price": 999.99,
+    "category": "Smartwatch",
+    "image": "https://m.media-amazon.com/images/I/71n9y8W4NVL._AC_SL1500_.jpg",
+    "description": "Ultimate multisport GPS watch.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 44,
+    "name": "Google Pixel Watch 3",
+    "price": 399.99,
+    "category": "Smartwatch",
+    "image": "https://m.media-amazon.com/images/I/61o1b1L9R7L._AC_SL1500_.jpg",
+    "description": "Clean design with Fitbit integration.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 45,
+    "name": "Huawei Watch GT 5 Pro",
+    "price": 449.99,
+    "category": "Smartwatch",
+    "image": "https://m.media-amazon.com/images/I/71kX4Vq6b+L._AC_SL1500_.jpg",
+    "description": "Long battery life with premium build.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 46,
+    "name": "Amazfit GTR 5",
+    "price": 249.99,
+    "category": "Smartwatch",
+    "image": "https://m.media-amazon.com/images/I/71Y7k2q3ZFL._AC_SL1500_.jpg",
+    "description": "30-day battery life with AMOLED display.",
+    "inStock": true,
+    "rating": 4.5
+  },
+  {
+    "id": 47,
+    "name": "Fitbit Sense 2",
+    "price": 299.99,
+    "category": "Smartwatch",
+    "image": "https://m.media-amazon.com/images/I/61p-Rz2iDUL._AC_SL1500_.jpg",
+    "description": "Stress management and health insights.",
+    "inStock": true,
+    "rating": 4.4
+  },
+  {
+    "id": 48,
+    "name": "OnePlus Watch 2",
+    "price": 299.99,
+    "category": "Smartwatch",
+    "image": "https://m.media-amazon.com/images/I/61V3V7qJ0FL._AC_SL1500_.jpg",
+    "description": "100-hour battery with Wear OS.",
+    "inStock": true,
+    "rating": 4.6
+  },
+
+
+  {
+    "id": 49,
+    "name": "LG C4 55-inch OLED 4K TV",
+    "price": 1799.99,
+    "category": "Televisions",
+    "image": "https://m.media-amazon.com/images/I/81aC+Yq8TxL._AC_SL1500_.jpg",
+    "description": "Best picture quality with perfect blacks.",
+    "inStock": true,
+    "rating": 4.9
+  },
+  {
+    "id": 50,
+    "name": "Samsung S95D 65-inch OLED TV",
+    "price": 3399.99,
+    "category": "Televisions",
+    "image": "https://m.media-amazon.com/images/I/71oR1tL3tPL._AC_SL1500_.jpg",
+    "description": "QD-OLED with incredible brightness.",
+    "inStock": true,
+    "rating": 4.9
+  },
+  {
+    "id": 51,
+    "name": "Sony Bravia 9 75-inch Mini LED TV",
+    "price": 3999.99,
+    "category": "Televisions",
+    "image": "https://m.media-amazon.com/images/I/81d2w0q2oZL._AC_SL1500_.jpg",
+    "description": "Best processing for movies and gaming.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 52,
+    "name": "TCL QM8 65-inch Mini LED TV",
+    "price": 1199.99,
+    "category": "Televisions",
+    "image": "https://m.media-amazon.com/images/I/81Y2qL0vJBL._AC_SL1500_.jpg",
+    "description": "Best value high-brightness TV.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 53,
+    "name": "Hisense U8N 55-inch Mini LED TV",
+    "price": 899.99,
+    "category": "Televisions",
+    "image": "https://m.media-amazon.com/images/I/71nY9N5qKGL._AC_SL1500_.jpg",
+    "description": "Excellent brightness and contrast for price.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 54,
+    "name": "Samsung QN90D 55-inch Neo QLED TV",
+    "price": 1499.99,
+    "category": "Televisions",
+    "image": "https://m.media-amazon.com/images/I/81g3V5iZ0dL._AC_SL1500_.jpg",
+    "description": "Bright room champion with anti-glare.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 55,
+    "name": "Vizio Quantum Pro 65-inch TV",
+    "price": 799.99,
+    "category": "Televisions",
+    "image": "https://m.media-amazon.com/images/I/81lVv2qN8EL._AC_SL1500_.jpg",
+    "description": "Budget-friendly quantum dot TV.",
+    "inStock": true,
+    "rating": 4.5
+  },
+  {
+    "id": 56,
+    "name": "Roku Pro Series 75-inch TV",
+    "price": 1499.99,
+    "category": "Televisions",
+    "image": "https://m.media-amazon.com/images/I/81fVq6K0mYL._AC_SL1500_.jpg",
+    "description": "Excellent smart features with Mini LED.",
+    "inStock": true,
+    "rating": 4.6
+  },
+
+  {
+    "id": 57,
+    "name": "Roborock S8 Pro Ultra",
+    "price": 1499.99,
+    "category": "Robot Cleaner",
+    "image": "https://m.media-amazon.com/images/I/61g5lS3Q2ZL._AC_SL1500_.jpg",
+    "description": "Self-emptying, self-washing robot vacuum with mopping.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 58,
+    "name": "Ecovacs Deebot X2 Omni",
+    "price": 1399.99,
+    "category": "Robot Cleaner",
+    "image": "https://m.media-amazon.com/images/I/71c5q4cFtZL._AC_SL1500_.jpg",
+    "description": "Square design for better corner cleaning.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 59,
+    "name": "iRobot Roomba Combo j9+",
+    "price": 1299.99,
+    "category": "Robot Cleaner",
+    "image": "https://m.media-amazon.com/images/I/71s8Xb6uO+L._AC_SL1500_.jpg",
+    "description": "Advanced object avoidance with auto-empty.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 60,
+    "name": "Narwal Freo X Ultra",
+    "price": 1199.99,
+    "category": "Robot Cleaner",
+    "image": "https://m.media-amazon.com/images/I/71e8k3q3t+L._AC_SL1500_.jpg",
+    "description": "Powerful suction with excellent mopping.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 61,
+    "name": "Dreame L20 Ultra",
+    "price": 1099.99,
+    "category": "Robot Cleaner",
+    "image": "https://m.media-amazon.com/images/I/71c1q1QbKZL._AC_SL1500_.jpg",
+    "description": "Detachable mop with hot water washing.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 62,
+    "name": "Eufy Clean X9 Pro",
+    "price": 899.99,
+    "category": "Robot Cleaner",
+    "image": "https://m.media-amazon.com/images/I/71d3W8Z1QvL._AC_SL1500_.jpg",
+    "description": "No subscription needed, great value.",
+    "inStock": true,
+    "rating": 4.5
+  },
+  {
+    "id": 63,
+    "name": "Shark AI Ultra 2-in-1",
+    "price": 699.99,
+    "category": "Robot Cleaner",
+    "image": "https://m.media-amazon.com/images/I/71kV0bJ4RPL._AC_SL1500_.jpg",
+    "description": "Self-emptying with strong suction.",
+    "inStock": true,
+    "rating": 4.4
+  },
+  {
+    "id": 64,
+    "name": "Yeedi M12 Pro+",
+    "price": 599.99,
+    "category": "Robot Cleaner",
+    "image": "https://m.media-amazon.com/images/I/71J8fB8bNVL._AC_SL1500_.jpg",
+    "description": "Budget self-emptying robot with mopping.",
+    "inStock": true,
+    "rating": 4.3
+  },
+
+  
+  {
+    "id": 65,
+    "name": "Sony A7 IV Mirrorless Camera",
+    "price": 2499.99,
+    "category": "Cameras",
+    "image": "https://m.media-amazon.com/images/I/71r2N7k5mYL._AC_SL1500_.jpg",
+    "description": "33MP full-frame hybrid camera.",
+    "inStock": true,
+    "rating": 4.9
+  },
+  {
+    "id": 66,
+    "name": "Canon EOS R5 Mark II",
+    "price": 4299.99,
+    "category": "Cameras",
+    "image": "https://m.media-amazon.com/images/I/71n9m6X2WLL._AC_SL1500_.jpg",
+    "description": "45MP with 8K video capability.",
+    "inStock": true,
+    "rating": 4.9
+  },
+  {
+    "id": 67,
+    "name": "Nikon Z8",
+    "price": 3999.99,
+    "category": "Cameras",
+    "image": "https://m.media-amazon.com/images/I/71kZfQJ0jNL._AC_SL1500_.jpg",
+    "description": "Professional mirrorless with stacked sensor.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 68,
+    "name": "Fujifilm X-T5",
+    "price": 1699.99,
+    "category": "Cameras",
+    "image": "https://m.media-amazon.com/images/I/71d3W8Z1QvL._AC_SL1500_.jpg",
+    "description": "40MP APS-C with film simulations.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 69,
+    "name": "Sony ZV-E1 Vlogging Camera",
+    "price": 2199.99,
+    "category": "Cameras",
+    "image": "https://m.media-amazon.com/images/I/71p3W7v7hQL._AC_SL1500_.jpg",
+    "description": "Full-frame for content creators.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 70,
+    "name": "Canon EOS R50",
+    "price": 799.99,
+    "category": "Cameras",
+    "image": "https://m.media-amazon.com/images/I/71Y7k2q3ZFL._AC_SL1500_.jpg",
+    "description": "Entry-level mirrorless with great video.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 71,
+    "name": "Panasonic Lumix S5 II",
+    "price": 1999.99,
+    "category": "Cameras",
+    "image": "https://m.media-amazon.com/images/I/71kX4Vq6b+L._AC_SL1500_.jpg",
+    "description": "Phase detection AF with excellent video.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 72,
+    "name": "DJI Osmo Pocket 3",
+    "price": 549.99,
+    "category": "Cameras",
+    "image": "https://m.media-amazon.com/images/I/61p-Rz2iDUL._AC_SL1500_.jpg",
+    "description": "Gimbal camera for vlogging.",
+    "inStock": true,
+    "rating": 4.8
+  },
+
+  {
+    "id": 73,
+    "name": "PlayStation 5 Pro",
+    "price": 699.99,
+    "category": "Gaming",
+    "image": "https://m.media-amazon.com/images/I/61V3V7qJ0FL._AC_SL1500_.jpg",
+    "description": "Enhanced PS5 with better graphics.",
+    "inStock": false,
+    "rating": 4.9
+  },
+  {
+    "id": 74,
+    "name": "Nintendo Switch 2",
+    "price": 399.99,
+    "category": "Gaming",
+    "image": "https://m.media-amazon.com/images/I/71J8fB8bNVL._AC_SL1500_.jpg",
+    "description": "Next-gen hybrid console.",
+    "inStock": false,
+    "rating": 4.8
+  },
+  {
+    "id": 75,
+    "name": "Xbox Series X (2TB)",
+    "price": 599.99,
+    "category": "Gaming",
+    "image": "https://m.media-amazon.com/images/I/61ubS2C9zPL._AC_SL1500_.jpg",
+    "description": "Most powerful Xbox console.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 76,
+    "name": "ASUS ROG Ally X",
+    "price": 799.99,
+    "category": "Gaming",
+    "image": "https://m.media-amazon.com/images/I/71p3W7v7hQL._AC_SL1500_.jpg",
+    "description": "Windows handheld gaming PC.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 77,
+    "name": "Steam Deck OLED 1TB",
+    "price": 649.99,
+    "category": "Gaming",
+    "image": "https://m.media-amazon.com/images/I/71d3uR7qNPL._AC_SL1500_.jpg",
+    "description": "Improved display and battery life.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 78,
+    "name": "Razer Blade 16 (2025)",
+    "price": 3599.99,
+    "category": "Gaming",
+    "image": "https://m.media-amazon.com/images/I/81lVv2qN8EL._AC_SL1500_.jpg",
+    "description": "Premium gaming laptop with mini-LED.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 79,
+    "name": "Logitech G Pro X 2 Lightspeed Headset",
+    "price": 249.99,
+    "category": "Gaming",
+    "image": "https://m.media-amazon.com/images/I/61Q0IsqDPPL._AC_SL1500_.jpg",
+    "description": "Pro-grade wireless gaming headset.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 80,
+    "name": "Elgato Stream Deck XL",
+    "price": 249.99,
+    "category": "Gaming",
+    "image": "https://m.media-amazon.com/images/I/71kV0bJ4RPL._AC_SL1500_.jpg",
+    "description": "Advanced control for streamers.",
+    "inStock": true,
+    "rating": 4.8
+  },
+
+
+  {
+    "id": 81,
+    "name": "Nike Pegasus 41 Running Shoes",
+    "price": 139.99,
+    "category": "Sports",
+    "image": "https://m.media-amazon.com/images/I/71n9y8W4NVL._AC_SL1500_.jpg",
+    "description": "Responsive cushioning for daily running.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 82,
+    "name": "Adidas Ultraboost 24",
+    "price": 189.99,
+    "category": "Sports",
+    "image": "https://m.media-amazon.com/images/I/71oR1tL3tPL._AC_SL1500_.jpg",
+    "description": "Maximum energy return running shoes.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 83,
+    "name": "Under Armour HOVR Machina 3",
+    "price": 149.99,
+    "category": "Sports",
+    "image": "https://m.media-amazon.com/images/I/71YRSQX1JTL._AC_SL1500_.jpg",
+    "description": "Connected running shoes with coaching.",
+    "inStock": true,
+    "rating": 4.6
+  },
+  {
+    "id": 84,
+    "name": "Hoka Clifton 9",
+    "price": 144.99,
+    "category": "Sports",
+    "image": "https://m.media-amazon.com/images/I/71uN6wMFD7L._AC_SL1500_.jpg",
+    "description": "Maximum cushioning with lightweight design.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 85,
+    "name": "Brooks Ghost 16",
+    "price": 139.99,
+    "category": "Sports",
+    "image": "https://m.media-amazon.com/images/I/81l2q7y3tQL._AC_SL1500_.jpg",
+    "description": "Smooth and reliable daily trainer.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 86,
+    "name": "Asics Gel-Kayano 31",
+    "price": 159.99,
+    "category": "Sports",
+    "image": "https://m.media-amazon.com/images/I/71xWn9wxxaL._AC_SL1500_.jpg",
+    "description": "Premium stability running shoe.",
+    "inStock": true,
+    "rating": 4.7
+  },
+  {
+    "id": 87,
+    "name": "New Balance Fresh Foam X 1080v13",
+    "price": 164.99,
+    "category": "Sports",
+    "image": "https://m.media-amazon.com/images/I/71tI8I1R3t0L._AC_SL1500_.jpg",
+    "description": "Plush cushioning for long runs.",
+    "inStock": true,
+    "rating": 4.8
+  },
+  {
+    "id": 88,
+    "name": "Saucony Endorphin Speed 4",
+    "price": 179.99,
+    "category": "Sports",
+    "image": "https://m.media-amazon.com/images/I/71d3uR7qNPL._AC_SL1500_.jpg",
+    "description": "Versatile plated trainer for speedwork.",
+    "inStock": true,
+    "rating": 4.7
+  }
+]
+
+
