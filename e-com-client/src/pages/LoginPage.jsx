@@ -2,12 +2,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
+import axios from 'axios';
 import useAuthStore from '../store/useAuthStore';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const { login } = useAuthStore();
   const navigate = useNavigate();
@@ -15,17 +17,24 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
-    // ডামি লগইন – পরে ব্যাকএন্ড কানেক্ট করব
-    const dummyUser = {
-      id: 1,
-      name: "John Doe",
-      email: email
-    };
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/login', {email, password});
+      const { token, user } = response.data;
 
-    login(dummyUser, "dummy_token");
-    setLoading(false);
-    navigate('/');
+      // login into zustand
+      login(user, token);
+      alert('Login successfull');
+      navigate('/');
+    } catch(err) {
+      setError(err.response?.data?.message || 'Login failed. Check email/password.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+    
+    // navigate('/');
   };
 
   return (
@@ -48,6 +57,8 @@ const LoginPage = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12">
         <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Login to MyShop</h2>
+
+          {error && <p className="text-red-600 text-center mb-4">{error}</p>}
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>

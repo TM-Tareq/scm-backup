@@ -1,9 +1,9 @@
-import bcrypt, { genSalt } from 'bcrypt';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import db from '../db.js';
 
 export const register = async(req, res)=> {
-    const { fname, lname, email, password, confirmPassword, gender } = req.body;
+    const { fname, lname, email, password, confirmPassword } = req.body;
 
     if(!fname || !email || !password) {
         return res.status(400).json({ message:'First name, email and password required'});
@@ -18,12 +18,33 @@ export const register = async(req, res)=> {
 
         const password_hash = await bcrypt.hash(password, 12);
 
-        const [result] = await db.query('INSERT INTO users (fname, lname, email, password_hash, gender) VALUES (?, ?, ?, ?, ?)', [fname, lname, email, password_hash, gender]);
+        const [result] = await db.query('INSERT INTO users (fname, lname, email, password_hash) VALUES (?, ?, ?, ?)', [fname, lname, email, password_hash]);
 
-        res.status(201).json({message: 'User registered successfully', userId: result.inserId});
+        // id of a new user
+        const userId = result.insertId;
+
+        // taking user data
+        const [newUser] = await db.query('SELECT id, fname, lname, email FROM users WHERE id = ?', [userId]);
+        const user = newUser[0];
+
+        const token = jwt.sign(
+            {id: user.id, email: user.email},
+            process.env.JWT_SECRET,
+            {expiresIn: process.env.JWT_EXPIRE}
+        );
+
+        res.status(201).json({message: 'User registered successfully',
+            token,
+            user: {
+                id: user.id,
+                fname: user.fname,
+                lname: user.lname,
+                email: user.email
+            }
+        });
     } catch(error) {
-        console.error(error);
-        res.status(500).json({message: 'Server error'});
+        console.error('Registration error: ', error);
+        res.status(500).json({message: 'Server error', error: error.message});
     }
 };
 
@@ -59,7 +80,6 @@ export const login = async(req, res)=> {
                 fname: user.fname,
                 lname: user.lname,
                 email: user.email,
-                gender: user.gender
             }
         });
     } catch(error) {
@@ -76,5 +96,5 @@ export const login = async(req, res)=> {
 
 
 
-
+// nice
 // controllers/auth.controller.js ফাইলটা সাধারণত একটা Node.js + Express প্রজেক্টে থাকে (বা যেকোনো MERN/MEAN/MEVN স্ট্যাকের প্রজেক্টে)। এটার মূল কাজ হলো Authentication (লগইন, সাইনআপ, পাসওয়ার্ড রিসেট ইত্যাদি) সম্পর্কিত সব লজিক হ্যান্ডেল করা।

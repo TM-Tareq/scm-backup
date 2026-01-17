@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
+import axios from 'axios';
 
 const RegisterPage = () => {
   const [firstName, setFirstName] = useState('');
@@ -10,31 +11,43 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const { login } = useAuthStore();
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
 
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/register', {
+        fname: firstName,
+        lname: lastName,
+        email,
+        password,
+        confirmPassword
+      });
 
-    const fullName = `${firstName} ${lastName}`.trim();
+      const { token, user } = response.data;
 
-    const dummyUser = {
-      id: 1,
-      name: fullName || "User",
-      email: email
-    };
+      login(user, token);
 
-    login(dummyUser, "dummy_token");
-    setLoading(false);
-    navigate('/');
+      alert('Registration successfull! You are now logged in.');
+      navigate('/');
+    }  catch(err) {
+      setError(err.response?.data?.message || 'Registration failed');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,6 +70,8 @@ const RegisterPage = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12">
         <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Create Account</h2>
+
+          {error && <p className="text-red-600 text-center mb-4">{error}</p>}
 
           <form onSubmit={handleRegister} className="space-y-6">
             {/* First Name */}
