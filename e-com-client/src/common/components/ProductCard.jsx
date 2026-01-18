@@ -5,11 +5,14 @@ import useWishlistStore from '../../store/useWishlistStore';
 import useCartStore from '../../store/useCartStore';
 
 const ProductCard = ({ product }) => {
-  const { toggleWishlist, isInWishlist } = useWishlistStore();
+  const { toggleWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
   const [imageError, setImageError] = useState(false);
 
-  const wishlisted = isInWishlist(product.id);
+  const isInWishlist = useWishlistStore((state) => state.isInWishlist(product.id));
+  
+  const wishlisted = isInWishlist;
+
 
   const handleWishlist = (e) => {
     e.preventDefault(); // for closing navigation

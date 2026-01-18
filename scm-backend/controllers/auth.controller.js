@@ -88,6 +88,27 @@ export const login = async(req, res)=> {
     }
 }
 
+export const getCurrentUser = async(req, res)=> {
+    try {
+        const userId = req.user.id;
+
+        const[user] = await db.query(
+            'SELECT id, fname, lname, email FROM users WHERE id= ?', [userId]
+        );
+
+        if(user.length === 0) {
+            return res.status(400).json({ message: 'User not found'});
+        }
+
+        res.json({
+            user: user[0]
+        });
+    } catch(error) {
+        console.error('Get current user error: ', error);
+        res.status(500).json({ message: 'Server error'});
+    }
+};    
+
 
 
 

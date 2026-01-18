@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
 import axios from 'axios';
 import useAuthStore from '../store/useAuthStore';
+import toast from 'react-hot-toast';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -22,13 +23,14 @@ const LoginPage = () => {
     try {
       const response = await axios.post('http://localhost:5000/api/auth/login', {email, password});
       const { token, user } = response.data;
+      localStorage.setItem('token', token);
 
       // login into zustand
       login(user, token);
-      alert('Login successfull');
+      toast.success(`Welcome Back`);
       navigate('/');
     } catch(err) {
-      setError(err.response?.data?.message || 'Login failed. Check email/password.');
+      toast.error(err.response?.data?.message || 'Login failed');
       console.error(err);
     } finally {
       setLoading(false);

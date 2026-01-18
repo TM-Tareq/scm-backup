@@ -1,4 +1,4 @@
-// src/common/components/SearchBar.jsx
+
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import useSearchStore from '../../store/useSearchStore';

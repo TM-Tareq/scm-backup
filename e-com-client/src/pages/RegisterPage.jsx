@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
   const [firstName, setFirstName] = useState('');
@@ -35,12 +36,14 @@ const RegisterPage = () => {
         password,
         confirmPassword
       });
+      
 
       const { token, user } = response.data;
+      localStorage.setItem('token', token);
 
       login(user, token);
 
-      alert('Registration successfull! You are now logged in.');
+      toast.success(`Welcome ${firstName} ${lastName}`);
       navigate('/');
     }  catch(err) {
       setError(err.response?.data?.message || 'Registration failed');

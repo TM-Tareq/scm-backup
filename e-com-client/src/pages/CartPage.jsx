@@ -1,4 +1,3 @@
-// src/pages/CartPage.jsx
 import { Trash2, Plus, Minus, ShoppingCart } from 'lucide-react';
 import useCartStore from '../store/useCartStore';
 

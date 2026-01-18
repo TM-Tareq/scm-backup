@@ -10,10 +10,10 @@ const HomePage = () => {
 
   const isSearching = searchQuery.trim() !== '';
 
-  // ডিফল্ট সব প্রোডাক্ট
+  // Default all product
   let displayedProducts = products;
 
-  // সার্চ করলে ম্যাচ করা প্রোডাক্ট প্রথমে + বাকি পরে
+  // first product by searching then rest of the product
   if (isSearching) {
     const matchedProducts = products.filter((product) => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -32,7 +32,7 @@ const HomePage = () => {
 
   return (
     <div>
-      {/* সার্চ না করলে সব সেকশন দেখাবে */}
+      {/* all section if not search */}
       {!isSearching ? (
         <>
           <HeroSlider />
@@ -82,7 +82,7 @@ const HomePage = () => {
           </section>
         </>
       ) : (
-        /* সার্চ করলে শুধু ফিল্টার্ড প্রোডাক্ট + infinite scroll */
+        /* default product if search and infinite scroll */
         <section className="py-12 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
