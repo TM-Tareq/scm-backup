@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../config/api';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import useAuthStore from './useAuthStore';
@@ -8,16 +8,20 @@ const useCartStore = create(
     (set, get) => ({
       cart: [], // [{ product, quantity }] -> initially null
 
-      fetchCart: async ()=> {
+      fetchCart: async () => {
         try {
-          const token = localStorage.getItem('token')
-          if(!token) return;
-
-          const response = await axios.get('http://localhost:5000/api/auth/cart', {
-            headers: { Authorization: `Bearer ${token}`},
-          });
-          set({ cart: response.data.cartItems || [] })
-        } catch(err) {
+          const response = await api.get('/auth/cart');
+          const formattedCart = (response.data.cartItems || []).map(item => ({
+            product: {
+              id: item.product_id,
+              name: item.name,
+              price: item.price,
+              image: item.image
+            },
+            quantity: item.quantity
+          }));
+          set({ cart: formattedCart });
+        } catch (err) {
           console.error('Fetch cart failed: ', err);
         }
       },
@@ -28,51 +32,43 @@ const useCartStore = create(
 
           if (existing) {
             return {
-              cart: state.cart.map(item=> item.product.id === product.id ? {...item, quantity: item.quantity + quantity} : item)
+              cart: state.cart.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + quantity } : item)
             };
           }
 
-          return { 
-            cart: [...state.cart, { product, quantity}] 
+          return {
+            cart: [...state.cart, { product, quantity }]
           };
         });
 
         // Saving into backend
         try {
-          await axios.post(
-            'http://localhost:5000/api/cart/add',
-            {productId: product.id, quantity: 1},
-            {headers: {Authorization: `Bearer ${localStorage.getItem('token')}`}}
-          );
-        } catch(err) {
+          await api.post('/auth/cart/add', { productId: product.id, quantity: 1 });
+        } catch (err) {
           console.error('Add to cart backend failed', err);
         }
       },
 
       removeFromCart: async (productId) => {
-        set((state)=> {
-          const existing = state.cart.find((item)=> item.product.id === productId);
+        set((state) => {
+          const existing = state.cart.find((item) => item.product.id === productId);
           let updatedCart;
 
-          if(existing && existing.quantity > 1) {
-            updatedCart = state.cart.map((item)=>
-              item.product.id === productId ? {...item, quantity: item.quantity - 1} : item
+          if (existing && existing.quantity > 1) {
+            updatedCart = state.cart.map((item) =>
+              item.product.id === productId ? { ...item, quantity: item.quantity - 1 } : item
             );
           } else {
-            updatedCart = state.cart.filter((item)=> item.product.id !== productId);
+            updatedCart = state.cart.filter((item) => item.product.id !== productId);
           }
-          return {cart: updatedCart};
+          return { cart: updatedCart };
         });
 
         // Updating into backend
         try {
-          await axios.post(
-            'http://localhost:5000/api/cart/remove',
-            {productId},
-            {headers: {Authorization: `Bearer ${localStorage.getItem('token')}`}}
-          );
-        } catch(err) {
-          console.err('Remove from cart failed:', err);
+          await api.post('/auth/cart/remove', { productId });
+        } catch (err) {
+          console.error('Remove from cart failed:', err);
         }
       },
 
@@ -83,15 +79,15 @@ const useCartStore = create(
       },
 
       cartCount: () => get().cart.reduce((count, item) => {
-  const qty = item?.quantity || 0;
-  return count + qty;
-}, 0),
+        const qty = item?.quantity || 0;
+        return count + qty;
+      }, 0),
 
       totalPrice: () => {
         return get().cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
       },
 
-      clearCartOnLogout: ()=> set({cart: [] }),
+      clearCartOnLogout: () => set({ cart: [] }),
     }),
     {
       name: 'cart-storage',
@@ -100,8 +96,8 @@ const useCartStore = create(
 );
 
 // cart clear after logout
-useAuthStore.subscribe((state)=> {
-  if(!state.user) {
+useAuthStore.subscribe((state) => {
+  if (!state.user) {
     useCartStore.getState().clearCartOnLogout();
   }
 })

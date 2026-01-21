@@ -2,11 +2,17 @@ import HeroSlider from "../common/components/HeroSlider";
 import PopularCategories from "../common/components/PopularCategories";
 import ProductCard from "../common/components/ProductCard";
 import ProductGrid from "../common/components/ProductGrid";
-import products from "../data/products.json";
+import useProductStore from "../store/useProductStore";
 import useSearchStore from "../store/useSearchStore";
+import { useEffect } from "react";
 
 const HomePage = () => {
   const { searchQuery, selectedCategory } = useSearchStore();
+  const { products, fetchProducts, loading } = useProductStore();
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const isSearching = searchQuery.trim() !== '';
 
@@ -30,6 +36,8 @@ const HomePage = () => {
     displayedProducts = [...matchedProducts, ...nonMatchedProducts];
   }
 
+  if (loading) return <div className="text-center py-20">Loading...</div>;
+
   return (
     <div>
       {/* all section if not search */}
@@ -39,9 +47,15 @@ const HomePage = () => {
           <PopularCategories />
 
           {/* Trending */}
-          <section className="py-12 bg-gray-50">
+          <section className="py-16 bg-white dark:bg-slate-900 transition-colors">
             <div className="max-w-7xl mx-auto px-4">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">Trending Products</h2>
+              <div className="flex items-center justify-between mb-10">
+                <div>
+                  <h2 className="text-3xl font-black text-gray-900 dark:text-white">Trending Products</h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Our most popular picks this week</p>
+                </div>
+                <div className="h-1 flex-1 bg-gray-100 dark:bg-slate-800 mx-8 hidden md:block"></div>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                 {products.slice(0, 8).map((product) => (
                   <ProductCard key={product.id} product={product} />
@@ -51,28 +65,42 @@ const HomePage = () => {
           </section>
 
           {/* Pre-order */}
-          <section className="py-12 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-            <div className="max-w-7xl mx-auto px-4 text-center">
-              <h2 className="text-4xl font-bold mb-6">Pre-Order Now!</h2>
-              <div className="bg-white/10 rounded-xl p-8 max-w-2xl mx-auto">
-                <img 
-                  src={products[0]?.image} 
-                  alt="Pre-order" 
-                  className="w-full h-96 object-cover rounded-lg mb-6" 
-                />
-                <h3 className="text-3xl font-bold mb-4">{products[0]?.name}</h3>
-                <p className="text-xl mb-6">Coming Soon - Be the first to get it!</p>
-                <button className="bg-white text-purple-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100">
-                  Pre-Order Now
-                </button>
+          <section className="py-20 bg-gradient-to-br from-indigo-700 via-blue-600 to-indigo-900 text-white relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+            <div className="max-w-7xl mx-auto px-4 relative z-10">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center text-left">
+                <div>
+                  <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-xs font-black tracking-widest uppercase mb-6">Exclusive Launch</span>
+                  <h2 className="text-5xl md:text-6xl font-black mb-6 leading-tight">Pre-Order the Next Generation.</h2>
+                  <p className="text-xl opacity-80 mb-10 max-w-lg">Be among the first to experience the future of technology. Limited stock available for pre-launch customers.</p>
+                  <div className="flex flex-wrap gap-4">
+                    <button className="bg-white text-indigo-700 px-10 py-4 rounded-2xl font-black hover:bg-gray-100 transition-all shadow-xl shadow-white/10 active:scale-95">
+                      Secure Mine Now
+                    </button>
+                  </div>
+                </div>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full scale-75 group-hover:scale-100 transition-transform duration-1000"></div>
+                  <img
+                    src={products[0]?.image}
+                    alt="Pre-order"
+                    className="w-full h-[500px] object-cover rounded-3xl shadow-2xl relative z-10 transition-transform duration-500 group-hover:-translate-y-4"
+                  />
+                </div>
               </div>
             </div>
           </section>
 
           {/* Best Sellers */}
-          <section className="py-12 bg-gray-50">
+          <section className="py-16 bg-gray-50 dark:bg-slate-950/50 transition-colors">
             <div className="max-w-7xl mx-auto px-4">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">Best Sellers</h2>
+              <div className="flex items-center justify-between mb-10">
+                <div>
+                  <h2 className="text-3xl font-black text-gray-900 dark:text-white">Best Sellers</h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Top-rated by our global community</p>
+                </div>
+                <div className="h-1 flex-1 bg-gray-100 dark:bg-slate-800 mx-8 hidden md:block"></div>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                 {products.slice(8, 16).map((product) => (
                   <ProductCard key={product.id} product={product} />
@@ -83,21 +111,28 @@ const HomePage = () => {
         </>
       ) : (
         /* default product if search and infinite scroll */
-        <section className="py-12 bg-gray-50">
+        <section className="py-16 bg-white dark:bg-slate-900 min-h-screen transition-colors">
           <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Search Results for "{searchQuery}"
-            </h2>
-            <p className="text-lg text-gray-600 mb-8">
-              {displayedProducts.length} products found
-            </p>
+            <div className="mb-12">
+              <h2 className="text-lg font-bold text-blue-600 uppercase tracking-widest mb-2">Search Results</h2>
+              <h3 className="text-4xl font-black text-gray-900 dark:text-white">
+                Exploring "{searchQuery}"
+              </h3>
+              <p className="text-gray-500 mt-2 font-medium">Found {displayedProducts.length} premium products matching your criteria</p>
+            </div>
 
             {displayedProducts.length > 0 ? (
               <ProductGrid initialProducts={displayedProducts} />
             ) : (
-              <div className="text-center py-20">
-                <p className="text-3xl text-gray-500">No products found</p>
-                <p className="text-lg text-gray-400 mt-4">Try a different search term</p>
+              <div className="text-center py-32 bg-gray-50 dark:bg-slate-800/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-slate-800">
+                <p className="text-3xl font-black text-gray-400 dark:text-gray-600">No products discovered</p>
+                <p className="text-lg text-gray-400 mt-4">Try refining your search terms or exploring categories</p>
+                <button
+                  onClick={() => useSearchStore.getState().clearSearch()}
+                  className="mt-8 px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition"
+                >
+                  Clear All Filters
+                </button>
               </div>
             )}
           </div>

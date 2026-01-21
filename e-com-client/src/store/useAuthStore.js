@@ -1,34 +1,42 @@
-import axios from 'axios';
+import api from '../config/api';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 const useAuthStore = create(
     persist(
-        (set)=> ({
+        (set) => ({
             user: null,
             token: null,
             loading: true,
 
-            login: (userData, token)=> set({user: userData, token, loading: false}),
-            logout: ()=> {
+            login: (userData, token) => set({ user: userData, token, loading: false }),
+            logout: () => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                set({ user: null, token: null, loading: false})
+                set({ user: null, token: null, loading: false })
             },
-            updateProfile: (updateUser)=> set((state)=> ({user: {...state.user, ...updateUser} })),
+            updateProfile: async (updateData) => {
+                try {
+                    const response = await api.put('/auth/profile-update', updateData);
+                    set({ user: response.data.user });
+                } catch (err) {
+                    console.error('Update profile failed', err);
+                    throw err;
+                }
+            },
 
             // Authentication check in the first load
-            checkAuth: async ()=> {
+            checkAuth: async () => {
                 const token = localStorage.getItem('token');
-                if(!token) {
-                    set({ loading: false});
+                if (!token) {
+                    set({ loading: false });
                     return;
                 }
 
                 try {
-                const response = await axios.get('http://localhost:5000/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
-                set({ user: response.data.user, token, loading: false });
-                } catch(err) {
+                    const response = await api.get('/auth/me');
+                    set({ user: response.data.user, token, loading: false });
+                } catch (err) {
                     console.error(err);
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
@@ -38,7 +46,7 @@ const useAuthStore = create(
         }),
         {
             name: 'auth-storage', // save at localstorage
-            partialize: (state)=> ({ user: state.user, token: state.token})
+            partialize: (state) => ({ user: state.user, token: state.token })
         }
     )
 );

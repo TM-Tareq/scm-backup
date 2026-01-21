@@ -6,11 +6,11 @@ import useCartStore from '../../store/useCartStore';
 
 const ProductCard = ({ product }) => {
   const { toggleWishlist } = useWishlistStore();
+  const isInWishlist = useWishlistStore((state) => state.isInWishlist(product.id));
   const { addToCart } = useCartStore();
   const [imageError, setImageError] = useState(false);
 
-  const isInWishlist = useWishlistStore((state) => state.isInWishlist(product.id));
-  
+
   const wishlisted = isInWishlist;
 
 
@@ -27,7 +27,7 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div className="group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden">
+    <div className="group relative bg-white dark:bg-slate-900 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 dark:border-slate-800">
 
       <Link to={`/product/${product.id}`} className="block">
         {/* Image Section */}
@@ -51,28 +51,31 @@ const ProductCard = ({ product }) => {
 
         {/* Content Section */}
         <div className="p-6 flex flex-col flex-grow">
-          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-3 group-hover:text-blue-600 transition">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
             {product.name}
           </h3>
+
+          <div className="flex items-center gap-2 mb-2 text-sm text-gray-500 dark:text-gray-400">
+            <span>Sold by: {product.store_name || "Official Store"}</span>
+          </div>
 
           <div className="flex items-center gap-2 mb-4">
             <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-4 h-4 ${
-                    i < Math.floor(product.rating)
+                  className={`w-4 h-4 ${i < Math.floor(product.rating)
                       ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
-                  }`}
+                      : "text-gray-300 dark:text-gray-600"
+                    }`}
                 />
               ))}
             </div>
-            <span className="text-sm text-gray-600">({product.rating})</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">({product.rating})</span>
           </div>
 
           <div className="flex items-end justify-between mt-auto mb-5">
-            <p className="text-3xl font-bold text-gray-900">
+            <p className="text-3xl font-bold text-gray-900 dark:text-white">
               ${product.price.toFixed(2)}
             </p>
           </div>
@@ -83,12 +86,11 @@ const ProductCard = ({ product }) => {
       {/* Wishlist Heart */}
       <button
         onClick={handleWishlist}
-        className="absolute top-4 right-12 p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:scale-110 transition z-10"
+        className="absolute top-4 right-12 p-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full shadow-md hover:scale-110 transition z-10"
       >
         <Heart
-          className={`w-5 h-5 transition-colors ${
-            wishlisted ? "fill-red-500 text-red-500" : "text-gray-700"
-          }`}
+          className={`w-5 h-5 transition-colors ${wishlisted ? "fill-red-500 text-red-500" : "text-gray-700 dark:text-gray-300"
+            }`}
         />
       </button>
 

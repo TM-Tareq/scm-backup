@@ -13,14 +13,23 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "mysql2": "^3.16.1"
+    "lucide-react": "^0.562.0",
+    "multer": "^2.0.2",
+    "mysql2": "^3.16.1",
+    "nodemailer": "^7.0.12",
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.12.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "autoprefixer": "^10.4.23",
+    "nodemon": "^3.1.11",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18"
   }
 }

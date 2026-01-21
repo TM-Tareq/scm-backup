@@ -13,15 +13,22 @@ import ProductDetailPage from './pages/ProductDetailPage'
 import ProfilePage from './pages/ProfilePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
-import { Children } from 'react';
+import OrderTracking from './pages/OrderTracking'
+import Blog from './pages/Blog'
+import FAQ from './pages/FAQ'
+import Contact from './pages/Contact'
+import CheckoutPage from './pages/CheckoutPage'
+import useThemeStore from './store/useThemeStore'
+import useCartStore from './store/useCartStore'
+import useWishlistStore from './store/useWishlistStore'
 import { useEffect } from 'react';
 
 // Private Route component
-const PrivateRoute = ({children}) => {
+const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuthStore();
   const location = useLocation();
 
-  if(loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
@@ -29,7 +36,7 @@ const PrivateRoute = ({children}) => {
     )
   }
 
-  if(!user) {
+  if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
@@ -37,11 +44,25 @@ const PrivateRoute = ({children}) => {
 };
 
 const App = () => {
-  const {checkAuth, loading} = useAuthStore();
+  const { checkAuth, loading, user } = useAuthStore();
+  const { initTheme } = useThemeStore();
+  const { fetchCart } = useCartStore();
+  const { fetchWishlist } = useWishlistStore();
 
   useEffect(() => {
-    checkAuth();
+    const initApp = async () => {
+      await checkAuth();
+      initTheme();
+    };
+    initApp();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchCart();
+      fetchWishlist();
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -50,10 +71,10 @@ const App = () => {
       </div>
     );
   }
-  
+
   return (
     <>
-    <Toaster 
+      <Toaster
         position="top-right"
         reverseOrder={false}
         toastOptions={{
@@ -67,51 +88,63 @@ const App = () => {
         }}
       />
 
-    <div className='min-h-screen bg-gray-50'>
-      <Header />
-      <main className='flex-grow'>
-        <Routes>
-          {/* Public Routes */}
-          <Route path='/' element= {<HomePage />} />
-          <Route path='/product/:id' element={<ProductDetailPage />} />
-          <Route path='/login' element={<LoginPage />} />
-          <Route path='/register' element={<RegisterPage />} />
-          
-          {/* Private Routes */}
-          <Route 
-            path='/profile'
-            element={
-              <PrivateRoute>
-                <ProfilePage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/cart'
-            element={
-              <PrivateRoute>
-                <CartPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path='/wishlist'
-            element={
-              <PrivateRoute>
-                <WishlistPage />
-              </PrivateRoute>
-            }
-          />
+      <div className='min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors'>
+        <Header />
+        <main className='flex-grow'>
+          <Routes>
+            {/* Public Routes */}
+            <Route path='/' element={<HomePage />} />
+            <Route path='/product/:id' element={<ProductDetailPage />} />
+            <Route path='/login' element={<LoginPage />} />
+            <Route path='/register' element={<RegisterPage />} />
+            <Route path='/track-order' element={<OrderTracking />} />
+            <Route path='/blog' element={<Blog />} />
+            <Route path='/faq' element={<FAQ />} />
+            <Route path='/contact' element={<Contact />} />
+
+            {/* Private Routes */}
+            <Route
+              path='/profile'
+              element={
+                <PrivateRoute>
+                  <ProfilePage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/cart'
+              element={
+                <PrivateRoute>
+                  <CartPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/wishlist'
+              element={
+                <PrivateRoute>
+                  <WishlistPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/checkout'
+              element={
+                <PrivateRoute>
+                  <CheckoutPage />
+                </PrivateRoute>
+              }
+            />
 
             {/* 404 or any other page */}
             <Route path='*' element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-      <Footer />
+          </Routes>
+        </main>
+        <Footer />
 
-    </div>
-  
-  </>
+      </div>
+
+    </>
   )
 }
 
