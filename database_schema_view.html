@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Schema Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .diagram-container {
+            width: 100%;
+            overflow: auto;
+            /* Allow scrolling */
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Force the SVG to be large enough to be readable */
+        .mermaid svg {
+            min-width: 3000px;
+            /* Force a minimum width */
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Database Schema Diagram</h1>
+    <p style="text-align: center; color: #666;">Scroll horizontally and vertically to view the full diagram.</p>
+
+    <div class="diagram-container">
+        <div class="mermaid">
+            classDiagram
+            %% --- CORE USER & AUTH MODULE ---
+            class users {
+            INT id PK
+            VARCHAR fname
+            VARCHAR lname
+            VARCHAR email
+            VARCHAR password_hash
+            ENUM role
+            VARCHAR status
+            TIMESTAMP created_at
+            }
+            class roles {
+            INT id PK
+            VARCHAR name
+            TEXT description
+            JSON permissions
+            }
+            class user_roles {
+            INT id PK
+            INT user_id FK
+            INT role_id FK
+            INT assigned_by FK
+            }
+            class sessions {
+            INT id PK
+            VARCHAR session_id
+            INT user_id FK
+            TIMESTAMP expires_at
+            }
+            class two_factor_auth {
+            INT id PK
+            INT user_id FK
+            VARCHAR secret
+            BOOLEAN is_enabled
+            }
+            class login_history {
+            BIGINT id PK
+            INT user_id FK
+            VARCHAR ip_address
+            ENUM login_status
+            }
+            class audit_logs {
+            INT id PK
+            INT user_id FK
+            VARCHAR action
+            VARCHAR target_table
+            JSON changes
+            }
+
+            users "1" -- "*" user_roles
+            roles "1" -- "*" user_roles
+            users "1" -- "*" sessions
+            users "1" -- "1" two_factor_auth
+            users "1" -- "*" login_history
+            users "1" -- "*" audit_logs
+            users "1" -- "*" vendors : owner
+
+            %% --- PRODUCT & INVENTORY MODULE ---
+            class products {
+            INT id PK
+            VARCHAR name
+            DECIMAL price
+            INT stock
+            INT vendor_id FK
+            VARCHAR image
+            }
+            class vendors {
+            INT id PK
+            INT user_id FK
+            VARCHAR store_name
+            ENUM status
+            DECIMAL commission_rate
+            }
+            class warehouses {
+            INT id PK
+            VARCHAR name
+            VARCHAR code
+            INT manager_id FK
+            DECIMAL latitude
+            DECIMAL longitude
+            }
+            class warehouse_inventory {
+            INT id PK
+            INT warehouse_id FK
+            INT product_id FK
+            INT quantity
+            }
+            class stock_transfers {
+            INT id PK
+            INT from_warehouse_id FK
+            INT to_warehouse_id FK
+            INT product_id FK
+            INT quantity
+            ENUM status
+            }
+            class inventory_alerts {
+            INT id PK
+            INT warehouse_id FK
+            INT product_id FK
+            ENUM alert_type
+            }
+            class suppliers {
+            INT id PK
+            VARCHAR company_name
+            VARCHAR supplier_code
+            }
+            class purchase_orders {
+            INT id PK
+            INT supplier_id FK
+            INT warehouse_id FK
+            ENUM status
+            }
+            class goods_received_notes {
+            INT id PK
+            INT purchase_order_id FK
+            INT warehouse_id FK
+            ENUM status
+            }
+            class quality_checks {
+            INT id PK
+            INT grn_id FK
+            INT product_id FK
+            INT quantity_rejected
+            }
+
+            vendors "1" -- "*" products
+            products "1" -- "*" warehouse_inventory
+            warehouses "1" -- "*" warehouse_inventory
+            warehouses "1" -- "*" stock_transfers : from/to
+            products "1" -- "*" stock_transfers
+            warehouses "1" -- "*" inventory_alerts
+            products "1" -- "*" inventory_alerts
+            suppliers "1" -- "*" purchase_orders
+            warehouses "1" -- "*" purchase_orders
+            purchase_orders "1" -- "*" goods_received_notes
+            goods_received_notes "1" -- "*" quality_checks
+
+            %% --- SALES & ORDERING MODULE ---
+            class carts {
+            INT id PK
+            INT user_id FK
+            DECIMAL total_price
+            }
+            class cart_items {
+            INT id PK
+            INT cart_id FK
+            INT product_id FK
+            INT quantity
+            }
+            class orders {
+            INT id PK
+            INT user_id FK
+            DECIMAL total_price
+            ENUM status
+            VARCHAR shipping_address
+            }
+            class order_items {
+            INT id PK
+            INT order_id FK
+            INT product_id FK
+            INT quantity
+            }
+            class sub_orders {
+            INT id PK
+            INT order_id FK
+            INT vendor_id FK
+            DECIMAL sub_total
+            }
+            class invoices {
+            INT id PK
+            VARCHAR invoice_number
+            INT order_id FK
+            INT user_id FK
+            DECIMAL total_amount
+            }
+            class return_requests {
+            INT id PK
+            INT order_id FK
+            INT user_id FK
+            ENUM status
+            }
+
+            users "1" -- "*" carts
+            carts "1" -- "*" cart_items
+            products "1" -- "*" cart_items
+            users "1" -- "*" orders
+            orders "1" -- "*" order_items
+            products "1" -- "*" order_items
+            orders "1" -- "*" sub_orders
+            vendors "1" -- "*" sub_orders
+            orders "1" -- "1" invoices
+            orders "1" -- "*" return_requests
+
+            %% --- FINANCE & PAYMENTS MODULE ---
+            class payments {
+            INT id PK
+            INT order_id FK
+            INT invoice_id FK
+            DECIMAL amount
+            ENUM status
+            }
+            class refunds {
+            INT id PK
+            INT payment_id FK
+            INT order_id FK
+            DECIMAL amount
+            }
+            class vendor_settlements {
+            INT id PK
+            INT vendor_id FK
+            DECIMAL net_amount
+            ENUM status
+            }
+            class commissions {
+            INT id PK
+            DECIMAL rate_percentage
+            DATE effective_date
+            }
+            class payouts {
+            INT id PK
+            INT vendor_id FK
+            DECIMAL amount
+            ENUM status
+            }
+            class taxes {
+            INT id PK
+            INT order_id FK
+            DECIMAL tax_amount
+            }
+            class coupons {
+            INT id PK
+            VARCHAR code
+            ENUM discount_type
+            DECIMAL discount_value
+            }
+            class coupon_usage {
+            INT id PK
+            INT coupon_id FK
+            INT user_id FK
+            INT order_id FK
+            }
+
+            orders "1" -- "*" payments
+            invoices "1" -- "*" payments
+            payments "1" -- "*" refunds
+            vendors "1" -- "*" vendor_settlements
+            vendors "1" -- "*" payouts
+            orders "1" -- "*" taxes
+            coupons "1" -- "*" coupon_usage
+            users "1" -- "*" coupon_usage
+            orders "1" -- "*" coupon_usage
+
+            %% --- LOGISTICS & TRACKING MODULE ---
+            class shipments {
+            INT id PK
+            VARCHAR tracking_code
+            INT order_id FK
+            INT warehouse_id FK
+            INT carrier_id FK
+            ENUM status
+            }
+            class carriers {
+            INT id PK
+            VARCHAR name
+            VARCHAR tracking_url_template
+            }
+            class tracking_codes {
+            INT id PK
+            INT shipment_id FK
+            INT product_id FK
+            VARCHAR unique_code
+            }
+            class gps_locations {
+            BIGINT id PK
+            INT shipment_id FK
+            DECIMAL latitude
+            DECIMAL longitude
+            }
+            class delivery_routes {
+            INT id PK
+            INT shipment_id FK
+            JSON waypoints
+            }
+            class iot_devices {
+            INT id PK
+            VARCHAR device_id
+            ENUM device_type
+            INT assigned_to FK
+            }
+
+            orders "1" -- "*" shipments
+            warehouses "1" -- "*" shipments
+            carriers "1" -- "*" shipments
+            shipments "1" -- "*" tracking_codes
+            shipments "1" -- "*" gps_locations
+            shipments "1" -- "*" delivery_routes
+            users "1" -- "*" iot_devices : assigned_to
+
+            %% --- CONTENT & ENGAGEMENT MODULE ---
+            class blogs {
+            INT id PK
+            VARCHAR title
+            TEXT content
+            INT user_id FK
+            }
+            class blog_comments {
+            INT id PK
+            INT blog_id FK
+            INT user_id FK
+            TEXT content
+            }
+            class blog_reactions {
+            INT id PK
+            INT blog_id FK
+            INT user_id FK
+            VARCHAR type
+            }
+            class faqs {
+            INT id PK
+            TEXT question
+            TEXT answer
+            VARCHAR category
+            }
+            class announcements {
+            INT id PK
+            TEXT message
+            ENUM type
+            INT created_by FK
+            }
+
+            users "1" -- "*" blogs
+            blogs "1" -- "*" blog_comments
+            users "1" -- "*" blog_comments
+            blogs "1" -- "*" blog_reactions
+            users "1" -- "*" blog_reactions
+            users "1" -- "*" announcements
+
+            %% --- CRM & LOYALTY MODULE ---
+            class customer_tiers {
+            INT id PK
+            VARCHAR tier_name
+            INT tier_level
+            DECIMAL discount_percentage
+            }
+            class loyalty_points {
+            INT id PK
+            INT user_id FK
+            INT points
+            }
+            class loyalty_transactions {
+            INT id PK
+            INT user_id FK
+            ENUM transaction_type
+            INT points
+            }
+            class customer_segments {
+            INT id PK
+            INT user_id FK
+            VARCHAR segment_type
+            }
+            class notifications {
+            INT id PK
+            INT user_id FK
+            VARCHAR title
+            BOOLEAN is_read
+            }
+            class notification_preferences {
+            INT id PK
+            INT user_id FK
+            VARCHAR notification_type
+            }
+            class notification_templates {
+            INT id PK
+            VARCHAR template_key
+            TEXT email_body
+            }
+            class wish_lists {
+            INT id PK
+            INT user_id FK
+            INT product_id FK
+            }
+
+            users "1" -- "1" loyalty_points
+            users "1" -- "*" loyalty_transactions
+            users "1" -- "*" customer_segments
+            users "1" -- "*" notifications
+            users "1" -- "*" notification_preferences
+            users "1" -- "*" wish_lists
+            products "1" -- "*" wish_lists
+            class system_settings {
+            INT id PK
+            VARCHAR setting_key
+            VARCHAR setting_value
+            }
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: false },
+            classDiagram: { useMaxWidth: false }
+        });
+    </script>
+
+</body>
+
+</html>

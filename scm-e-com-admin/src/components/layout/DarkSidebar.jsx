@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard, Store, DollarSign, CreditCard, BarChart3, Users,
-    HelpCircle, FileText, Settings, LogOut, ChevronLeft, Shield, Megaphone, Truck, Newspaper
+    HelpCircle, FileText, Settings, LogOut, ChevronLeft, Shield, Megaphone, Truck, Newspaper, Warehouse
 } from 'lucide-react';
 import useThemeStore from '../../store/useThemeStore';
 
@@ -21,6 +21,7 @@ const DarkSidebar = ({ userRole = 'admin' }) => {
             { path: '/users', label: 'Users', icon: Users },
             { path: '/editors', label: 'Editors', icon: Shield },
             { path: '/carriers', label: 'Carriers', icon: Truck },
+            { path: '/warehouses', label: 'Warehouses', icon: Warehouse },
             { path: '/blogs', label: 'Blogs', icon: Newspaper },
             { path: '/faq-manager', label: 'FAQ Manager', icon: HelpCircle },
             { path: '/announcements', label: 'Announcements', icon: Megaphone },
@@ -43,16 +44,14 @@ const DarkSidebar = ({ userRole = 'admin' }) => {
         <motion.div
             initial={false}
             animate={{ width: isCollapsed ? 80 : 256 }}
-            className={`fixed left-0 top-0 h-screen border-r z-50 flex flex-col transition-colors ${
-                isDarkMode 
-                    ? 'bg-gradient-to-b from-slate-900 to-slate-800 border-slate-700' 
+            className={`fixed left-0 top-0 h-screen border-r z-50 flex flex-col transition-colors ${isDarkMode
+                    ? 'bg-gradient-to-b from-slate-900 to-slate-800 border-slate-700'
                     : 'bg-white border-gray-200'
-            }`}
+                }`}
         >
             {/* Header */}
-            <div className={`p-6 border-b flex items-center justify-between transition-colors ${
-                isDarkMode ? 'border-slate-700' : 'border-gray-200'
-            }`}>
+            <div className={`p-6 border-b flex items-center justify-between transition-colors ${isDarkMode ? 'border-slate-700' : 'border-gray-200'
+                }`}>
                 <AnimatePresence mode="wait">
                     {!isCollapsed && (
                         <motion.div
@@ -73,11 +72,10 @@ const DarkSidebar = ({ userRole = 'admin' }) => {
                 </AnimatePresence>
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className={`p-2 rounded-lg transition ${
-                        isDarkMode 
-                            ? 'hover:bg-slate-700 text-slate-400 hover:text-white' 
+                    className={`p-2 rounded-lg transition ${isDarkMode
+                            ? 'hover:bg-slate-700 text-slate-400 hover:text-white'
                             : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
-                    }`}
+                        }`}
                 >
                     <motion.div
                         animate={{ rotate: isCollapsed ? 180 : 0 }}
@@ -98,24 +96,22 @@ const DarkSidebar = ({ userRole = 'admin' }) => {
                                 key={item.path}
                                 to={item.path}
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-3 rounded-lg transition-all group ${
-                                        isActive
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
-                                            : isDarkMode
-                                                ? 'text-slate-400 hover:bg-slate-700 hover:text-white'
-                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                    `flex items-center gap-3 px-3 py-3 rounded-lg transition-all group ${isActive
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50'
+                                        : isDarkMode
+                                            ? 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                     }`
                                 }
                             >
                                 {({ isActive }) => (
                                     <>
-                                        <Icon className={`h-5 w-5 flex-shrink-0 ${
-                                            isActive 
-                                                ? 'text-white' 
-                                                : isDarkMode 
-                                                    ? 'text-slate-400 group-hover:text-white' 
+                                        <Icon className={`h-5 w-5 flex-shrink-0 ${isActive
+                                                ? 'text-white'
+                                                : isDarkMode
+                                                    ? 'text-slate-400 group-hover:text-white'
                                                     : 'text-gray-600 group-hover:text-gray-900'
-                                        }`} />
+                                            }`} />
                                         <AnimatePresence mode="wait">
                                             {!isCollapsed && (
                                                 <motion.span
@@ -138,11 +134,10 @@ const DarkSidebar = ({ userRole = 'admin' }) => {
 
             {/* Footer - Logout */}
             <div className={`p-3 border-t transition-colors ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                <button className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all w-full ${
-                    isDarkMode 
-                        ? 'text-slate-400 hover:bg-red-900/20 hover:text-red-400' 
+                <button className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all w-full ${isDarkMode
+                        ? 'text-slate-400 hover:bg-red-900/20 hover:text-red-400'
                         : 'text-gray-600 hover:bg-red-50 hover:text-red-600'
-                }`}>
+                    }`}>
                     <LogOut className="h-5 w-5 flex-shrink-0" />
                     <AnimatePresence mode="wait">
                         {!isCollapsed && (

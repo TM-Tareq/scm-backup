@@ -5,23 +5,27 @@ import {
     Search, Calendar, Filter, Download,
     CheckCircle, AlertTriangle, Info, Clock, ExternalLink
 } from 'lucide-react';
+import api from '../api';
+import toast from 'react-hot-toast';
 
 const AuditLogs = () => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Mock data
-        setTimeout(() => {
-            setLogs([
-                { id: 1, user: 'admin@system.com', action: 'UPDATE_COMMISSION', resource: 'Finance', status: 'success', timestamp: '2026-01-20 14:23:45', ip: '192.168.1.1' },
-                { id: 2, user: 'editor_mark', action: 'APPROVE_VENDOR', resource: 'Vendors', status: 'success', timestamp: '2026-01-20 13:10:02', ip: '192.168.1.45' },
-                { id: 3, user: 'system_bot', action: 'AUTO_PAYOUT_FAILED', resource: 'Payouts', status: 'error', timestamp: '2026-01-20 12:00:00', ip: '127.0.0.1' },
-                { id: 4, user: 'admin@system.com', action: 'DELETE_USER', resource: 'Users', status: 'warning', timestamp: '2026-01-20 11:45:30', ip: '192.168.1.1' },
-                { id: 5, user: 'vendor_support', action: 'REJECT_VENDOR', resource: 'Vendors', status: 'success', timestamp: '2026-01-20 10:20:15', ip: '192.168.1.12' },
-            ]);
+    const fetchLogs = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/admin/audit-logs');
+            setLogs(res.data);
+        } catch (err) {
+            toast.error('Failed to reconstruct audit logs');
+        } finally {
             setLoading(false);
-        }, 800);
+        }
+    };
+
+    useEffect(() => {
+        fetchLogs();
     }, []);
 
     const StatusIcon = ({ status }) => {
@@ -108,25 +112,25 @@ const AuditLogs = () => {
                             ) : logs.map((log) => (
                                 <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:bg-slate-800 transition-colors group">
                                     <td className="px-6 py-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                                        {log.timestamp}
+                                        {new Date(log.created_at).toLocaleString()}
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
-                                            <span className="text-slate-800 dark:text-white font-bold">{log.user}</span>
-                                            <span className="text-[11px] text-slate-400">{log.ip}</span>
+                                            <span className="text-slate-800 dark:text-white font-bold">{log.fname} {log.lname}</span>
+                                            <span className="text-[11px] text-slate-400">{log.ip_address || '---'}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 font-semibold text-indigo-600">
-                                        {log.action}
+                                        {log.action?.toUpperCase()}
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                                            {log.resource}
+                                            {log.resource_type || 'SYSTEM'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <StatusIcon status={log.status} />
+                                            <StatusIcon status="success" />
                                             <button className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-indigo-600 transition">
                                                 <ExternalLink className="w-4 h-4" />
                                             </button>

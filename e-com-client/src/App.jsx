@@ -18,10 +18,13 @@ import Blog from './pages/Blog'
 import FAQ from './pages/FAQ'
 import Contact from './pages/Contact'
 import CheckoutPage from './pages/CheckoutPage'
+import TrackingPage from './pages/TrackingPage'
 import useThemeStore from './store/useThemeStore'
 import useCartStore from './store/useCartStore'
 import useWishlistStore from './store/useWishlistStore'
 import { useEffect } from 'react';
+import ChatSocketManager from './common/components/ChatSocketManager.jsx';
+import MessagesPage from './pages/MessagesPage';
 
 // Private Route component
 const PrivateRoute = ({ children }) => {
@@ -89,6 +92,7 @@ const App = () => {
       />
 
       <div className='min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors'>
+        <ChatSocketManager />
         <Header />
         <main className='flex-grow'>
           <Routes>
@@ -132,6 +136,14 @@ const App = () => {
               element={
                 <PrivateRoute>
                   <CheckoutPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path='/messages'
+              element={
+                <PrivateRoute>
+                  <MessagesPage />
                 </PrivateRoute>
               }
             />

@@ -5,23 +5,45 @@ import {
     ChevronDown, ChevronUp, Edit3, Trash2,
     Eye, EyeOff, GripVertical, Check
 } from 'lucide-react';
+import api from '../api';
+import toast from 'react-hot-toast';
 
 const FaqManager = () => {
     const [faqs, setFaqs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [expanded, setExpanded] = useState(null);
 
-    useEffect(() => {
-        // Mock data
-        setTimeout(() => {
-            setFaqs([
-                { id: 1, question: 'How do I apply for a vendor account?', answer: 'You can apply by clicking the "Become a Vendor" button on the homepage and filling out the application form. Our team will review it within 48 hours.', category: 'General', status: 'published' },
-                { id: 2, question: 'What are the platform commission rates?', answer: 'The standard commission rate is 10% per transaction. High-volume vendors may be eligible for custom rates.', category: 'Finance', status: 'published' },
-                { id: 3, question: 'How long do payouts take?', answer: 'Payouts are processed bi-weekly (1st and 15th of every month) for all completed orders.', category: 'Finance', status: 'draft' },
-            ]);
+    const fetchFAQs = async () => {
+        try {
+            const res = await api.get('/admin/faqs'); // Using /admin prefix as defined in admin.js
+            setFaqs(res.data);
+        } catch (err) {
+            console.error('Failed to fetch FAQs', err);
+            toast.error('Failed to load FAQs');
+        } finally {
             setLoading(false);
-        }, 800);
+        }
+    };
+
+    useEffect(() => {
+        fetchFAQs();
     }, []);
+
+    const handleAddFaq = async () => {
+        const question = prompt('Enter Question:');
+        if (!question) return;
+        const answer = prompt('Enter Answer:');
+        if (!answer) return;
+        const category = prompt('Enter Category (General, Finance, etc):', 'General');
+
+        try {
+            await api.post('/admin/faqs', { question, answer, category });
+            toast.success('FAQ Added');
+            fetchFAQs();
+        } catch (err) {
+            toast.error('Failed to add FAQ');
+        }
+    };
 
     const toggleExpand = (id) => {
         setExpanded(expanded === id ? null : id);
@@ -34,7 +56,10 @@ const FaqManager = () => {
                     <h1 className="text-2xl font-bold text-slate-800 dark:text-white">FAQ Management</h1>
                     <p className="text-slate-500 dark:text-slate-400">Edit and organize platform help content</p>
                 </div>
-                <button className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 font-medium">
+                <button
+                    onClick={handleAddFaq}
+                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 font-medium"
+                >
                     <Plus className="w-4 h-4" />
                     New Question
                 </button>
@@ -68,6 +93,8 @@ const FaqManager = () => {
                     Array(3).fill(0).map((_, i) => (
                         <div key={i} className="h-16 bg-white dark:bg-slate-900 rounded-xl animate-pulse"></div>
                     ))
+                ) : faqs.length === 0 ? (
+                    <p className="text-center text-gray-500 py-10">No FAQs found.</p>
                 ) : faqs.map((faq) => (
                     <div key={faq.id} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden group">
                         <div
@@ -81,8 +108,8 @@ const FaqManager = () => {
                                     <h3 className="font-semibold text-slate-800 dark:text-white">{faq.question}</h3>
                                     <div className="flex items-center gap-2 mt-1">
                                         <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">{faq.category}</span>
-                                        <span className={`w-1 h-1 rounded-full ${faq.status === 'published' ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
-                                        <span className="text-[10px] text-slate-400">{faq.status}</span>
+                                        <span className={`w-1 h-1 rounded-full ${faq.id % 2 === 0 ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
+                                        <span className="text-[10px] text-slate-400">Published</span>
                                     </div>
                                 </div>
                             </div>
@@ -111,7 +138,7 @@ const FaqManager = () => {
                                     </div>
                                     <div className="mt-4 flex gap-4">
                                         <button className="flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-700">
-                                            {faq.status === 'published' ? <><EyeOff className="w-4 h-4" /> Unpublish</> : <><Eye className="w-4 h-4" /> Publish Now</>}
+                                            <Eye className="w-4 h-4" /> View Details
                                         </button>
                                     </div>
                                 </motion.div>

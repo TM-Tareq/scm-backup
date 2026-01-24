@@ -46,6 +46,7 @@ function App() {
             <Route path="/dashboard" element={<VendorDashboard />} />
             <Route path="/products" element={<Products />} />
             <Route path="/products/new" element={<AddProduct />} />
+            <Route path="/products/edit/:id" element={<AddProduct />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/inventory" element={<Inventory />} />

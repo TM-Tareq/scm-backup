@@ -5,23 +5,35 @@ import {
     CheckCircle2 as CheckIcon, XCircle as XIcon, Search as SearchIcon,
     Filter as FilterIcon, ExternalLink as LinkIcon, MoreVertical as DotsIcon
 } from 'lucide-react';
+import api from '../api';
+import toast from 'react-hot-toast';
 
 const Payouts = () => {
     const [payouts, setPayouts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('all');
 
-    useEffect(() => {
-        // Mock data
-        setTimeout(() => {
-            setPayouts([
-                { id: 1, vendor: 'TechStore', amount: 1250.00, commission: 125.00, status: 'pending', period: 'Jan 1 - Jan 15', created_at: '2026-01-16' },
-                { id: 2, vendor: 'FashionHub', amount: 840.50, commission: 84.05, status: 'paid', period: 'Jan 1 - Jan 15', created_at: '2026-01-16', paid_at: '2026-01-17' },
-                { id: 3, vendor: 'ElectroWorld', amount: 3200.00, commission: 320.00, status: 'pending', period: 'Jan 1 - Jan 15', created_at: '2026-01-16' },
-                { id: 4, vendor: 'GreenLife', amount: 150.25, commission: 15.03, status: 'cancelled', period: 'Dec 15 - Dec 31', created_at: '2026-01-01' },
-            ]);
+    const fetchPayouts = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/admin/payouts');
+            // getPayouts returns p.* plus v.store_name
+            const mapped = res.data.map(p => ({
+                ...p,
+                vendor: p.store_name,
+                period: `${p.period_start} - ${p.period_end}`
+            }));
+            setPayouts(mapped);
+        } catch (err) {
+            console.error('Failed to load payouts', err);
+            toast.error('Failed to load payouts');
+        } finally {
             setLoading(false);
-        }, 800);
+        }
+    };
+
+    useEffect(() => {
+        fetchPayouts();
     }, []);
 
     const StatusBadge = ({ status }) => {
@@ -41,6 +53,25 @@ const Payouts = () => {
                 {status.charAt(0).toUpperCase() + status.slice(1)}
             </span>
         );
+    };
+
+    const filteredPayouts = payouts.filter(p =>
+        (filterStatus === 'all' || p.status === filterStatus)
+    );
+
+    const handleMarkPaid = async (payoutId) => {
+        try {
+            await api.put('/admin/payouts/status', {
+                payoutId,
+                status: 'paid',
+                notes: 'Marked as paid from admin panel'
+            });
+            toast.success('Payout marked as paid');
+            fetchPayouts();
+        } catch (err) {
+            console.error('Failed to update payout status', err);
+            toast.error('Failed to update payout status');
+        }
     };
 
     return (
@@ -128,7 +159,7 @@ const Payouts = () => {
                                         <td className="px-6 py-4 flex justify-end"><div className="h-8 bg-slate-100 rounded w-8"></div></td>
                                     </tr>
                                 ))
-                            ) : payouts.map((p) => (
+                            ) : filteredPayouts.map((p) => (
                                 <tr key={p.id} className="hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-800/50/50 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
@@ -142,10 +173,10 @@ const Payouts = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="font-bold text-slate-800 dark:text-white">${p.amount.toFixed(2)}</div>
+                                        <div className="font-bold text-slate-800 dark:text-white">${Number(p.amount).toFixed(2)}</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-sm font-medium text-slate-500 dark:text-slate-400">${p.commission.toFixed(2)}</div>
+                                        <div className="text-sm font-medium text-slate-500 dark:text-slate-400">${Number(p.commission_amount).toFixed(2)}</div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <StatusBadge status={p.status} />
@@ -153,7 +184,10 @@ const Payouts = () => {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             {p.status === 'pending' ? (
-                                                <button className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">
+                                                <button
+                                                    className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition"
+                                                    onClick={() => handleMarkPaid(p.id)}
+                                                >
                                                     Mark Paid
                                                 </button>
                                             ) : (

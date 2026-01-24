@@ -9,11 +9,17 @@ const api = axios.create({
     },
 });
 
+import useAuthStore from '../store/useAuthStore';
+
 // Request interceptor for adding auth token
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
+    const token = useAuthStore.getState().token;
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Don't override Content-Type for FormData (multipart/form-data)
+    if (config.data instanceof FormData) {
+        delete config.headers['Content-Type'];
     }
     return config;
 }, (error) => {

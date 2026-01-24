@@ -41,7 +41,8 @@ export const register = async (req, res) => {
                 fname: user.fname,
                 lname: user.lname,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                image_url: user.image_url
             }
         });
     } catch (error) {
@@ -82,7 +83,8 @@ export const login = async (req, res) => {
                 fname: user.fname,
                 lname: user.lname,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                image_url: user.image_url
             }
         });
     } catch (error) {
@@ -96,15 +98,21 @@ export const getCurrentUser = async (req, res) => {
         const userId = req.user.id;
 
         const [user] = await db.query(
-            'SELECT id, fname, lname, email, role FROM users WHERE id= ?', [userId]
+            'SELECT id, fname, lname, email, COALESCE(role, "customer") AS role, image_url FROM users WHERE id= ?', [userId]
         );
 
         if (user.length === 0) {
             return res.status(400).json({ message: 'User not found' });
         }
 
+        // Ensure role is set correctly (default to customer if null/undefined)
+        const userData = user[0];
+        if (!userData.role || userData.role === 'null' || userData.role === null) {
+            userData.role = 'customer';
+        }
+
         res.json({
-            user: user[0]
+            user: userData
         });
     } catch (error) {
         console.error('Get current user error: ', error);
@@ -115,21 +123,35 @@ export const getCurrentUser = async (req, res) => {
 export const updateProfile = async (req, res) => {
     const { fname, lname, email } = req.body;
     const userId = req.user.id;
+    const image_url = req.file ? req.file.path.replace(/\\/g, '/') : null;
 
     try {
-        await db.query(
-            'UPDATE users SET fname = ?, lname = ?, email = ? WHERE id = ?',
-            [fname, lname, email, userId]
-        );
+        if (image_url) {
+            await db.query(
+                'UPDATE users SET fname = ?, lname = ?, email = ?, image_url = ? WHERE id = ?',
+                [fname, lname, email, image_url, userId]
+            );
+        } else {
+            await db.query(
+                'UPDATE users SET fname = ?, lname = ?, email = ? WHERE id = ?',
+                [fname, lname, email, userId]
+            );
+        }
 
         const [updatedUser] = await db.query(
-            'SELECT id, fname, lname, email, role FROM users WHERE id = ?',
+            'SELECT id, fname, lname, email, COALESCE(role, "customer") AS role, image_url FROM users WHERE id = ?',
             [userId]
         );
 
+        // Ensure role is set correctly
+        const userData = updatedUser[0];
+        if (!userData.role || userData.role === 'null' || userData.role === null) {
+            userData.role = 'customer';
+        }
+
         res.json({
             message: 'Profile updated successfully',
-            user: updatedUser[0]
+            user: userData
         });
     } catch (error) {
         console.error('Update profile error: ', error);

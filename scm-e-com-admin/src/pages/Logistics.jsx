@@ -3,32 +3,63 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Truck, Package, Plus, Search, MapPin,
     Globe, ShieldCheck, AlertCircle, Edit, Trash2,
-    CheckCircle2, Clock
+    CheckCircle2, Clock, X
 } from 'lucide-react';
+import api from '../api';
+import toast from 'react-hot-toast';
 
 const Logistics = () => {
     const [carriers, setCarriers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [newCarrier, setNewCarrier] = useState({ name: '', tracking_url_template: '', logo_url: '' });
+
+    const fetchCarriers = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/admin/carriers');
+            setCarriers(res.data);
+        } catch (err) {
+            toast.error('Failed to load carriers');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        // Mock data
-        setTimeout(() => {
-            setCarriers([
-                { id: 1, name: 'DHL Express', type: 'International', status: 'active', areas: 'Global', contact: '+1 234 567 890' },
-                { id: 2, name: 'FedEx', type: 'International', status: 'active', areas: 'Americas, Europe', contact: '+1 987 654 321' },
-                { id: 3, name: 'LocalDash', type: 'Domestic', status: 'inactive', areas: 'City Central', contact: '+1 555 012 345' },
-            ]);
-            setLoading(false);
-        }, 800);
+        fetchCarriers();
     }, []);
 
+    const handleAddCarrier = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/admin/carriers', newCarrier);
+            toast.success('Carrier added successfully');
+            setShowModal(false);
+            setNewCarrier({ name: '', tracking_url_template: '', logo_url: '' });
+            fetchCarriers();
+        } catch (err) {
+            toast.error('Failed to add carrier');
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this carrier?')) return;
+        try {
+            await api.delete(`/admin/carriers/${id}`);
+            toast.success('Carrier deleted');
+            fetchCarriers();
+        } catch (err) {
+            toast.error('Failed to delete carrier');
+        }
+    };
+
     const StatusBadge = ({ status }) => (
-        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${status === 'active'
-                ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                : 'bg-slate-100 text-slate-700 border-slate-200'
+        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${status === 'active' || !status
+            ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+            : 'bg-slate-100 text-slate-700 border-slate-200'
             }`}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
+            {(status || 'active').charAt(0).toUpperCase() + (status || 'active').slice(1)}
         </span>
     );
 
@@ -56,7 +87,7 @@ const Logistics = () => {
                     </div>
                     <div>
                         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Active Carriers</p>
-                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white">12</h3>
+                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white">{carriers.length}</h3>
                     </div>
                 </div>
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4 transition-colors">
@@ -64,8 +95,8 @@ const Logistics = () => {
                         <Globe className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Global Coverage</p>
-                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white">180+ Countries</h3>
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Logistics Flow</p>
+                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white">Optimized</h3>
                     </div>
                 </div>
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4 transition-colors">
@@ -73,8 +104,8 @@ const Logistics = () => {
                         <Package className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Avg. Delivery Time</p>
-                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white">3.2 Days</h3>
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Fleet Management</p>
+                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white">Active</h3>
                     </div>
                 </div>
             </div>
@@ -100,8 +131,7 @@ const Logistics = () => {
                         <thead>
                             <tr className="bg-slate-50/50 dark:bg-slate-800/50">
                                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Carrier Name</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Type</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Service Areas</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tracking Template</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
                             </tr>
@@ -111,31 +141,30 @@ const Logistics = () => {
                                 Array(3).fill(0).map((_, i) => (
                                     <tr key={i} className="animate-pulse">
                                         <td className="px-6 py-4"><div className="h-5 bg-slate-100 dark:bg-slate-800 rounded w-32"></div></td>
-                                        <td className="px-6 py-4"><div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-20"></div></td>
                                         <td className="px-6 py-4"><div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-40"></div></td>
                                         <td className="px-6 py-4"><div className="h-6 bg-slate-100 dark:bg-slate-800 rounded-full w-20"></div></td>
                                         <td className="px-6 py-4 flex justify-end"><div className="h-8 bg-slate-100 dark:bg-slate-800 rounded w-8"></div></td>
                                     </tr>
                                 ))
+                            ) : carriers.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" className="px-6 py-10 text-center text-slate-500">No carriers found.</td>
+                                </tr>
                             ) : carriers.map((c) => (
                                 <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
-                                    <td className="px-6 py-4 font-semibold text-slate-800 dark:text-white">{c.name}</td>
-                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">{c.type}</td>
-                                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-                                        <div className="flex items-center gap-1.5">
-                                            <MapPin className="w-3.5 h-3.5" />
-                                            {c.areas}
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            {c.logo_url && <img src={c.logo_url} className="w-8 h-8 rounded-full bg-slate-100" alt={c.name} />}
+                                            <span className="font-semibold text-slate-800 dark:text-white">{c.name}</span>
                                         </div>
                                     </td>
+                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 font-mono truncate max-w-xs">{c.tracking_url_template || 'N/A'}</td>
                                     <td className="px-6 py-4">
                                         <StatusBadge status={c.status} />
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button className="p-2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition">
-                                                <Edit className="w-4 h-4" />
-                                            </button>
-                                            <button className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition">
+                                            <button className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition" onClick={() => handleDelete(c.id)}>
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
@@ -147,26 +176,67 @@ const Logistics = () => {
                 </div>
             </div>
 
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl p-4 flex gap-3 transition-colors">
-                <AlertCircle className="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0" />
-                <p className="text-sm text-amber-700 dark:text-amber-300">
-                    <span className="font-bold">Shipping Notice:</span> You currently have 3 carriers with pending license renewals. Please update certifications to maintain service levels.
-                </p>
-            </div>
-
-            {/* Simple Modal Placeholder */}
-            {showModal && (
-                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md p-6 border border-slate-100 dark:border-slate-800 transition-colors">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-4">Add New Carrier</h3>
-                        <p className="text-slate-500 dark:text-slate-400 mb-6">Connect a new logistics partner to the platform.</p>
-                        <div className="flex gap-3">
-                            <button onClick={() => setShowModal(false)} className="flex-1 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
-                            <button className="flex-1 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors">Add Partner</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <AnimatePresence>
+                {showModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    >
+                        <motion.form
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            onSubmit={handleAddCarrier}
+                            className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-100 dark:border-slate-800"
+                        >
+                            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
+                                <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tighter">New Carrier Protocol</h3>
+                                <button type="button" onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                                    <X className="w-5 h-5 text-slate-500" />
+                                </button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div>
+                                    <label className="block text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Carrier Name</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        placeholder="e.g. DHL Express"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 outline-none transition dark:text-white"
+                                        value={newCarrier.name}
+                                        onChange={(e) => setNewCarrier({ ...newCarrier, name: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Tracking Template</label>
+                                    <input
+                                        type="text"
+                                        placeholder="https://track.com/{{code}}"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 outline-none transition dark:text-white"
+                                        value={newCarrier.tracking_url_template}
+                                        onChange={(e) => setNewCarrier({ ...newCarrier, tracking_url_template: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Logo URL (Optional)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="https://logo-provider.com/carrier.png"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 outline-none transition dark:text-white"
+                                        value={newCarrier.logo_url}
+                                        onChange={(e) => setNewCarrier({ ...newCarrier, logo_url: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="p-6 bg-slate-50 dark:bg-slate-800/50 flex gap-3">
+                                <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Abort</button>
+                                <button type="submit" className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">Finalize Partner</button>
+                            </div>
+                        </motion.form>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

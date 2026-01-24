@@ -23,8 +23,28 @@ const useAuthStore = create((set) => ({
                 headers: { Authorization: `Bearer ${token}` }
             });
 
+            // Ideally fetch vendor status too, but for now user role is enough for initial check
+            // We might need to fetch vendor status here to block routes
             if (res.data.user.role === 'vendor') {
-                set({ user: res.data.user, isAuthenticated: true, loading: false });
+                // Fetch vendor details to get status
+                try {
+                    const vendorRes = await axios.get(`${API_URL}/vendor/status`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const vendorStatus = vendorRes.data.status;
+                    set({
+                        user: { ...res.data.user, vendorStatus },
+                        isAuthenticated: true,
+                        loading: false
+                    });
+                } catch (vErr) {
+                    // If vendor profile doesn't exist yet (e.g. step 2 not done), status is 'none'
+                    set({
+                        user: { ...res.data.user, vendorStatus: 'none' },
+                        isAuthenticated: true,
+                        loading: false
+                    });
+                }
             } else {
                 // If user is customer/admin, they shouldn't belong here, but for now we let them stay logged in
                 // or we can logout functionality
@@ -87,7 +107,11 @@ const useAuthStore = create((set) => ({
     createStoreProfile: async (storeData) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`${API_URL}/vendor/register`, storeData, {
+            await axios.post(`${API_URL}/vendor/register`, {
+                store_name: storeData.storeName,
+                store_description: storeData.description,
+                address: storeData.address
+            }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success('Store profile created!');

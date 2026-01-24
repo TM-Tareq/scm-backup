@@ -4,7 +4,8 @@ import {
     DollarSign, TrendingUp, History, Plus,
     Calendar, FileText, CheckCircle2, AlertCircle
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../api';
+import toast from 'react-hot-toast';
 
 const Commissions = () => {
     const [commissions, setCommissions] = useState([]);
@@ -12,30 +13,39 @@ const Commissions = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [newRate, setNewRate] = useState({ rate: '', date: '', notes: '' });
 
-    useEffect(() => {
-        // Mock data for now
-        setTimeout(() => {
-            setCommissions([
-                { id: 1, rate_percentage: 10.00, effective_date: '2026-01-01', created_by: 'Admin', notes: 'Standard platform fee' },
-                { id: 2, rate_percentage: 8.50, effective_date: '2025-06-01', created_by: 'Admin', notes: 'Summer promotion rate' },
-                { id: 3, rate_percentage: 12.00, effective_date: '2025-01-01', created_by: 'Admin', notes: 'Initial launch rate' },
-            ]);
+    const fetchCommissions = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/admin/commissions');
+            setCommissions(res.data);
+        } catch (err) {
+            console.error('Failed to load commissions', err);
+            toast.error('Failed to load commissions');
+        } finally {
             setLoading(false);
-        }, 800);
+        }
+    };
+
+    useEffect(() => {
+        fetchCommissions();
     }, []);
 
-    const handleAddRate = (e) => {
+    const handleAddRate = async (e) => {
         e.preventDefault();
-        const entry = {
-            id: Date.now(),
-            rate_percentage: parseFloat(newRate.rate),
-            effective_date: newRate.date,
-            created_by: 'Admin',
-            notes: newRate.notes
-        };
-        setCommissions([entry, ...commissions]);
-        setShowAddModal(false);
-        setNewRate({ rate: '', date: '', notes: '' });
+        try {
+            await api.post('/admin/commissions', {
+                rate_percentage: parseFloat(newRate.rate),
+                effective_date: newRate.date,
+                notes: newRate.notes
+            });
+            toast.success('Commission rate updated');
+            setShowAddModal(false);
+            setNewRate({ rate: '', date: '', notes: '' });
+            fetchCommissions();
+        } catch (err) {
+            console.error('Failed to set commission rate', err);
+            toast.error('Failed to set commission rate');
+        }
     };
 
     return (
@@ -81,7 +91,7 @@ const Commissions = () => {
             </motion.div>
 
             {/* History Table */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors">
+                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors">
                 <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2 transition-colors">
                     <History className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                     <h3 className="font-bold text-slate-800 dark:text-white">Rate History</h3>

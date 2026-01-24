@@ -20,10 +20,11 @@ const Users = () => {
     const fetchUsers = async () => {
         try {
             const response = await api.get('/admin/users/analytics');
-            setUsers(response.data);
+            console.log('Users response:', response.data);
+            setUsers(response.data || []);
         } catch (err) {
             console.error('Fetch users failed', err);
-            toast.error('Failed to load users');
+            toast.error(err.response?.data?.message || 'Failed to load users');
         } finally {
             setLoading(false);
         }
@@ -170,8 +171,12 @@ const Users = () => {
                                     >
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 font-bold">
-                                                    {user.fname[0]}{user.lname[0]}
+                                                <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 font-bold overflow-hidden">
+                                                    {user.image_url ? (
+                                                        <img src={`http://localhost:5000/${user.image_url}`} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <span>{user.fname[0]}{user.lname[0]}</span>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <div className="font-bold dark:text-white">{user.fname} {user.lname}</div>

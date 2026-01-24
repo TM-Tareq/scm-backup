@@ -3,7 +3,10 @@ import {
     createProfile,
     getDashboardStats,
     getVendorStatus,
-    requestVendorApproval
+    requestVendorApproval,
+    getVendorAnalytics,
+    getPayouts,
+    requestPayout
 } from '../controllers/vendor.controller.js';
 import { verifyToken, authorizeRole } from '../middleware/authMiddleware.js';
 
@@ -18,5 +21,11 @@ router.post('/request-approval', verifyToken, authorizeRole('vendor', 'customer'
 
 // Dashboard data (only for approved vendors)
 router.get('/dashboard', verifyToken, authorizeRole('vendor'), getDashboardStats);
+router.get('/analytics', verifyToken, authorizeRole('vendor'), getVendorAnalytics);
+
+// Payouts
+router.get('/payouts', verifyToken, authorizeRole('vendor'), getPayouts);
+router.post('/payouts', verifyToken, authorizeRole('vendor'), requestPayout);
+
 
 export default router;

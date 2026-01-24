@@ -1,5 +1,6 @@
 import db from '../db.js';
 import { sendEmail } from '../config/email.js';
+import bcrypt from 'bcrypt';
 
 export const getPendingVendors = async (req, res) => {
     try {
@@ -40,17 +41,8 @@ export const approveVendor = async (req, res) => {
             await sendEmail({
                 to: vendor.email,
                 subject: 'Your vendor store has been approved',
-                text: `Hi ${vendor.fname},
-
-Good news! Your vendor store "${vendor.store_name}" has been approved by the admin team.
-
-You can now log in to your vendor portal and start managing your store.
-
-Thank you for being part of our marketplace.`,
-                html: `<p>Hi <strong>${vendor.fname}</strong>,</p>
-<p>Good news! Your vendor store <strong>${vendor.store_name}</strong> has been <strong>approved</strong> by the admin team.</p>
-<p>You can now log in to your vendor portal and start managing your store.</p>
-<p>Thank you for being part of our marketplace.</p>`
+                text: `Hi ${vendor.fname},\n\nGood news! Your vendor store "${vendor.store_name}" has been approved by the admin team.\n\nYou can now log in to your vendor portal and start managing your store.\n\nThank you for being part of our marketplace.`,
+                html: `<p>Hi <strong>${vendor.fname}</strong>,</p><p>Good news! Your vendor store <strong>${vendor.store_name}</strong> has been <strong>approved</strong> by the admin team.</p><p>You can now log in to your vendor portal and start managing your store.</p><p>Thank you for being part of our marketplace.</p>`
             });
         }
 
@@ -81,17 +73,8 @@ export const rejectVendor = async (req, res) => {
             await sendEmail({
                 to: vendor.email,
                 subject: 'Your vendor verification request was not approved',
-                text: `Hi ${vendor.fname},
-
-Your vendor store "${vendor.store_name}" was not approved at this time.
-
-You can update your store details and request verification again from your vendor portal.
-
-If you believe this is a mistake, please contact support.`,
-                html: `<p>Hi <strong>${vendor.fname}</strong>,</p>
-<p>Your vendor store <strong>${vendor.store_name}</strong> was <strong>not approved</strong> at this time.</p>
-<p>You can update your store details and request verification again from your vendor portal.</p>
-<p>If you believe this is a mistake, please contact support.</p>`
+                text: `Hi ${vendor.fname},\n\nYour vendor store "${vendor.store_name}" was not approved at this time.\n\nYou can update your store details and request verification again from your vendor portal.\n\nIf you believe this is a mistake, please contact support.`,
+                html: `<p>Hi <strong>${vendor.fname}</strong>,</p><p>Your vendor store <strong>${vendor.store_name}</strong> was <strong>not approved</strong> at this time.</p><p>You can update your store details and request verification again from your vendor portal.</p><p>If you believe this is a mistake, please contact support.</p>`
             });
         }
 
@@ -105,13 +88,16 @@ If you believe this is a mistake, please contact support.`,
 export const getAllVendors = async (req, res) => {
     try {
         const [vendors] = await db.query(`
-            SELECT v.*, u.fname, u.lname, u.email 
+            SELECT v.*, u.fname, u.lname, u.email, v.created_at
             FROM vendors v 
             JOIN users u ON v.user_id = u.id 
+            ORDER BY v.created_at DESC
         `);
+        console.log(`Found ${vendors.length} vendors`);
         res.json(vendors);
     } catch (err) {
-        res.status(500).json({ message: 'Server error' });
+        console.error('Get All Vendors Error:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 }
 
@@ -191,6 +177,30 @@ export const addCarrier = async (req, res) => {
     }
 };
 
+export const updateCarrier = async (req, res) => {
+    const { id } = req.params;
+    const { name, logo_url, tracking_url_template, status } = req.body;
+    try {
+        await db.query(
+            'UPDATE carriers SET name = ?, logo_url = ?, tracking_url_template = ?, status = ? WHERE id = ?',
+            [name, logo_url, tracking_url_template, status || 'active', id]
+        );
+        res.json({ message: 'Carrier updated' });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const deleteCarrier = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query('DELETE FROM carriers WHERE id = ?', [id]);
+        res.json({ message: 'Carrier deleted' });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 // --- CONTENT MANAGEMENT (FAQs & Announcements) ---
 export const getFAQs = async (req, res) => {
     try {
@@ -225,12 +235,12 @@ export const getAnnouncements = async (req, res) => {
 };
 
 export const addAnnouncement = async (req, res) => {
-    const { message, type, start_date, end_date } = req.body;
+    const { title, message, type, audience, start_date, end_date } = req.body;
     const userId = req.user.id;
     try {
         await db.query(
-            'INSERT INTO announcements (message, type, start_date, end_date, created_by) VALUES (?, ?, ?, ?, ?)',
-            [message, type || 'info', start_date, end_date, userId]
+            'INSERT INTO announcements (title, message, audience, type, start_date, end_date, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [title || 'Announcement', message, audience || 'All Users', type || 'info', start_date, end_date, userId]
         );
         res.json({ message: 'Announcement created' });
     } catch (err) {
@@ -244,7 +254,7 @@ export const getAuditLogs = async (req, res) => {
         const [logs] = await db.query(`
             SELECT a.*, u.fname, u.lname 
             FROM audit_logs a 
-            JOIN users u ON a.user_id = u.id 
+            LEFT JOIN users u ON a.user_id = u.id 
             ORDER BY a.created_at DESC 
             LIMIT 100
         `);
@@ -258,17 +268,17 @@ export const getAuditLogs = async (req, res) => {
 export const getPlatformAnalytics = async (req, res) => {
     try {
         // Simple aggregate analytics
-        const [userCount] = await db.query('SELECT COUNT(*) as count FROM users');
+        const [users] = await db.query('SELECT COUNT(*) as count FROM users WHERE role = "user"');
         const [vendorCount] = await db.query('SELECT COUNT(*) as count FROM vendors WHERE status = "approved"');
-        const [orderStats] = await db.query('SELECT COUNT(*) as count, SUM(total_amount) as revenue FROM orders');
-        const [productCount] = await db.query('SELECT COUNT(*) as count FROM products');
+        const [orderStats] = await db.query('SELECT COUNT(*) as count, SUM(total_price) as revenue FROM orders');
+        const [products] = await db.query('SELECT COUNT(*) as count FROM products WHERE status = "approved"');
 
         res.json({
-            users: userCount[0].count,
+            users: users[0].count,
             vendors: vendorCount[0].count,
             orders: orderStats[0].count,
             revenue: orderStats[0].revenue || 0,
-            products: productCount[0].count
+            products: products[0].count
         });
     } catch (err) {
         res.status(500).json({ message: 'Server error' });
@@ -276,6 +286,29 @@ export const getPlatformAnalytics = async (req, res) => {
 };
 
 // --- EDITOR MANAGEMENT ---
+export const addEditor = async (req, res) => {
+    const { fname, lname, email, password } = req.body;
+    try {
+        // Check if user exists
+        const [existing] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
+        if (existing.length > 0) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await db.query(
+            'INSERT INTO users (fname, lname, email, password_hash, role, status) VALUES (?, ?, ?, ?, ?, ?)',
+            [fname, lname, email, hashedPassword, 'editor', 'active']
+        );
+
+        res.status(201).json({ message: 'Editor created successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 export const getEditors = async (req, res) => {
     try {
         const [editors] = await db.query("SELECT id, fname, lname, email, status, created_at FROM users WHERE role = 'editor'");
@@ -298,11 +331,42 @@ export const updateEditorStatus = async (req, res) => {
 export const deleteEditor = async (req, res) => {
     const { id } = req.params;
     try {
-        // We might want to just demote them to customer instead of deleting?
-        // Let's demote them to keep their data but remove privileges.
         await db.query('UPDATE users SET role = "customer" WHERE id = ? AND role = "editor"', [id]);
         res.json({ message: 'Editor demoted to customer' });
     } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// --- SYSTEM SETTINGS ---
+export const getSystemSettings = async (req, res) => {
+    try {
+        const [settings] = await db.query('SELECT * FROM system_settings');
+        // Convert to object
+        const settingsObj = {};
+        settings.forEach(s => {
+            settingsObj[s.setting_key] = s.setting_value;
+        });
+        res.json(settingsObj);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const updateSystemSettings = async (req, res) => {
+    const settings = req.body; // { key: value, key2: value2 }
+    try {
+        const keys = Object.keys(settings);
+        for (const key of keys) {
+            const value = settings[key];
+            await db.query(
+                'INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
+                [key, value, value]
+            );
+        }
+        res.json({ message: 'Settings updated' });
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -313,16 +377,17 @@ export const getUsersWithAnalytics = async (req, res) => {
             SELECT 
                 u.id, u.fname, u.lname, u.email, u.role, u.status, u.created_at,
                 COUNT(o.id) as total_orders,
-                IFNULL(SUM(o.total_amount), 0) as total_spent
+                IFNULL(SUM(o.total_price), 0) as total_spent
             FROM users u
             LEFT JOIN orders o ON u.id = o.user_id
-            GROUP BY u.id
+            GROUP BY u.id, u.fname, u.lname, u.email, u.role, u.status, u.created_at
             ORDER BY total_spent DESC
         `);
+        console.log(`Found ${users.length} users`);
         res.json(users);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Get Users With Analytics Error:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
 

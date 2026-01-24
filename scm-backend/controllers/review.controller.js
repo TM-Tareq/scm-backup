@@ -5,15 +5,31 @@ export const addReview = async (req, res) => {
     const userId = req.user.id;
 
     try {
-        // Check if user already reviewed this product
-        const [existing] = await db.query(
-            'SELECT id FROM product_reviews WHERE product_id = ? AND user_id = ?',
-            [productId, userId]
-        );
+        // 1. Verify user purchased the product
+        // For COD: Order must be 'delivered'
+        // For Online Payment: Order can be 'processing', 'shipped', 'delivered' (since they already paid)
 
-        if (existing.length > 0) {
-            return res.status(400).json({ message: 'You have already reviewed this product' });
+        const [purchaseCheck] = await db.query(`
+            SELECT o.id 
+            FROM orders o
+            JOIN order_items oi ON o.id = oi.order_id
+            WHERE o.user_id = ? 
+            AND oi.product_id = ?
+            AND (
+                (o.payment_method = 'cod' AND o.status = 'delivered')
+                OR 
+                (o.payment_method IN ('bkash', 'nagad', 'credit_card', 'paypal') AND o.status IN ('processing', 'shipped', 'delivered'))
+            )
+            LIMIT 1
+        `, [userId, productId]);
+
+        if (purchaseCheck.length === 0) {
+            return res.status(403).json({
+                message: 'You can only review products you have purchased. For Cash on Delivery, please wait until delivery is confirmed.'
+            });
         }
+
+        // Allow review (removing the "existing" check allows multiple reviews if they want)
 
         await db.query(
             'INSERT INTO product_reviews (product_id, user_id, rating, comment) VALUES (?, ?, ?, ?)',

@@ -9,6 +9,7 @@ import {
     LogOut,
     Moon,
     Sun,
+    MessageSquare,
 } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import useCartStore from "../../store/useCartStore";
@@ -18,6 +19,7 @@ import useSearchStore from "../../store/useSearchStore";
 import useAuthStore from "../../store/useAuthStore";
 import useThemeStore from "../../store/useThemeStore";
 import { useEffect } from "react";
+import useChatStore from "../../store/useChatStore";
 
 const Header = () => {
     const { isDarkMode, toggleDarkMode } = useThemeStore();
@@ -25,6 +27,8 @@ const Header = () => {
 
     const cartCount = useCartStore((state) => state.cartCount());
     const wishlistCount = useWishlistStore((state) => state.wishlistCount());
+    const unreadCount = useChatStore((state) => state.unreadCount);
+    const refreshUnreadCount = useChatStore((state) => state.refreshUnreadCount);
 
     const { user, logout } = useAuthStore();
     const navigate = useNavigate();
@@ -35,23 +39,20 @@ const Header = () => {
     };
 
     const handleLogout = () => {
-        console.log("Handle logout clicked");
         logout();
         navigate("/");
     };
 
     useEffect(() => {
         if (user) {
-            console.log("User logged in, fetching cart & wishlist...");
-
             useCartStore.getState().fetchCart?.();
 
             const fetchWishlist = useWishlistStore.getState().fetchWishlist;
             if (fetchWishlist) {
                 fetchWishlist();
-            } else {
-                console.warn("fetchWishlist function not found in store");
             }
+
+            refreshUnreadCount();
         }
     }, [user]);
 
@@ -157,6 +158,19 @@ const Header = () => {
                             {user && cartCount > 0 && (
                                 <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center shadow-lg shadow-blue-600/20">
                                     {cartCount}
+                                </span>
+                            )}
+                        </Link>
+
+                        <Link
+                            to="/messages"
+                            className="relative group p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-all"
+                            title="Messages"
+                        >
+                            <MessageSquare className="w-7 h-7 text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition-all" />
+                            {user && unreadCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center shadow-lg shadow-blue-600/20">
+                                    {unreadCount > 99 ? '99+' : unreadCount}
                                 </span>
                             )}
                         </Link>

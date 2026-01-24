@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import api from '../api';
 
 const AuthContext = createContext();
 
@@ -7,29 +8,63 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Simulation: Get user from localStorage or API
-        const savedUser = localStorage.getItem('admin_user');
-        if (savedUser) {
-            setUser(JSON.parse(savedUser));
-        } else {
-            // Default mock user for development
-            setUser({ id: 1, name: 'Admin User', role: 'admin' });
-        }
-        setLoading(false);
+        checkAuth();
     }, []);
 
-    const login = (userData) => {
-        setUser(userData);
-        localStorage.setItem('admin_user', JSON.stringify(userData));
+    const checkAuth = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const response = await api.get('/auth/me');
+            const userData = response.data.user;
+            
+            // Only allow admin and editor roles
+            if (userData.role === 'admin' || userData.role === 'editor') {
+                setUser(userData);
+            } else {
+                console.warn('User does not have admin/editor role:', userData.role);
+                localStorage.removeItem('token');
+            }
+        } catch (err) {
+            console.error('Auth check failed:', err);
+            localStorage.removeItem('token');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const login = async (email, password) => {
+        try {
+            const response = await api.post('/auth/login', { email, password });
+            const { token, user: userData } = response.data;
+            
+            // Only allow admin and editor roles
+            if (userData.role !== 'admin' && userData.role !== 'editor') {
+                throw new Error('Access denied. Admin or editor account required.');
+            }
+            
+            localStorage.setItem('token', token);
+            setUser(userData);
+            return { success: true };
+        } catch (err) {
+            return { 
+                success: false, 
+                error: err.response?.data?.message || err.message || 'Login failed' 
+            };
+        }
     };
 
     const logout = () => {
         setUser(null);
-        localStorage.removeItem('admin_user');
+        localStorage.removeItem('token');
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, checkAuth }}>
             {children}
         </AuthContext.Provider>
     );

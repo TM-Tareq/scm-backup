@@ -4,36 +4,62 @@ import {
     Users, Search, Filter, ShieldCheck, ShieldAlert,
     MoreHorizontal, CheckCircle2, XCircle, AlertCircle, Clock
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../../api';
+import toast from 'react-hot-toast';
 
 const Vendors = () => {
     const [vendors, setVendors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [error, setError] = useState(null);
+
+    const fetchVendors = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await api.get('/admin/vendors');
+            console.log('Vendors response:', res.data);
+            // backend returns v.*, u.fname, u.lname, u.email, created_at
+            const mapped = (res.data || []).map(v => ({
+                ...v,
+                joined: v.created_at || v.joined
+            }));
+            setVendors(mapped);
+        } catch (err) {
+            console.error('Failed to load vendors', err);
+            const errorMsg = err.response?.data?.message || 'Failed to load vendors';
+            setError(errorMsg);
+            toast.error(errorMsg);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        // Simulation for now - will be: axios.get('/api/admin/vendors')
-        setTimeout(() => {
-            setVendors([
-                { id: 1, store_name: 'TechStore', fname: 'John', lname: 'Doe', status: 'pending', email: 'john@techstore.com', joined: '2026-01-15' },
-                { id: 2, store_name: 'FashionHub', fname: 'Jane', lname: 'Smith', status: 'approved', email: 'jane@fashionhub.com', joined: '2026-01-12' },
-                { id: 3, store_name: 'ElectroWorld', fname: 'Mike', lname: 'Johnson', status: 'rejected', email: 'mike@electroworld.com', joined: '2026-01-10' },
-                { id: 4, store_name: 'GreenLife', fname: 'Sarah', lname: 'Wilson', status: 'approved', email: 'sarah@greenlife.com', joined: '2026-01-08' },
-                { id: 5, store_name: 'UrbanStyle', fname: 'David', lname: 'Brown', status: 'pending', email: 'david@urbanstyle.com', joined: '2026-01-05' },
-            ]);
-            setLoading(false);
-        }, 1000);
+        fetchVendors();
     }, []);
 
     const handleApprove = async (id) => {
-        // await axios.post('/api/admin/vendors/approve', { id })
-        setVendors(vendors.map(v => v.id === id ? { ...v, status: 'approved' } : v));
+        try {
+            await api.post('/admin/vendors/approve', { vendorId: id });
+            toast.success('Vendor approved');
+            setVendors(vendors.map(v => v.id === id ? { ...v, status: 'approved' } : v));
+        } catch (err) {
+            console.error('Approve vendor failed', err);
+            toast.error('Failed to approve vendor');
+        }
     };
 
     const handleReject = async (id) => {
-        // await axios.post('/api/admin/vendors/reject', { id })
-        setVendors(vendors.map(v => v.id === id ? { ...v, status: 'rejected' } : v));
+        try {
+            await api.post('/admin/vendors/reject', { vendorId: id });
+            toast.success('Vendor rejected');
+            setVendors(vendors.map(v => v.id === id ? { ...v, status: 'rejected' } : v));
+        } catch (err) {
+            console.error('Reject vendor failed', err);
+            toast.error('Failed to reject vendor');
+        }
     };
 
     const StatusBadge = ({ status }) => {
@@ -128,6 +154,12 @@ const Vendors = () => {
                                             <td className="px-6 py-4 flex justify-end"><div className="h-8 bg-slate-100 rounded w-8"></div></td>
                                         </tr>
                                     ))
+                                ) : error ? (
+                                    <tr>
+                                        <td colSpan="4" className="px-6 py-12 text-center text-red-500">
+                                            {error}
+                                        </td>
+                                    </tr>
                                 ) : filteredVendors.length > 0 ? (
                                     filteredVendors.map((vendor) => (
                                         <motion.tr
@@ -155,7 +187,7 @@ const Vendors = () => {
                                                 {new Date(vendor.joined).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className={`flex items-center justify-end gap-2 ${vendor.status === 'pending' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
                                                     {vendor.status === 'pending' ? (
                                                         <>
                                                             <button

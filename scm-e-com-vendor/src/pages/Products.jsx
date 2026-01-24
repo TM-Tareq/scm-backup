@@ -21,13 +21,19 @@ const Products = () => {
     const fetchProducts = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/products`, {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/products/vendor/all`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setProducts(res.data);
+            // Ensure images have full URLs
+            const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
+            const enrichedProducts = res.data.map(p => ({
+                ...p,
+                image: p.image ? (p.image.startsWith('http') ? p.image : `${baseUrl}/${p.image.split(',')[0].replace(/^\//, '')}`) : null
+            }));
+            setProducts(enrichedProducts);
         } catch (error) {
             console.error('Error fetching products:', error);
-            toast.error('Failed to load products');
+            toast.error('Failed to load your products');
         } finally {
             setLoading(false);
         }

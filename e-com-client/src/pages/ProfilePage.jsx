@@ -8,12 +8,24 @@ const ProfilePage = () => {
   const [fname, setFname] = useState(user?.fname || '');
   const [lname, setLname] = useState(user?.lname || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
   const handleSave = async () => {
     try {
-      await updateProfile({ fname, lname, email });
+      const formData = new FormData();
+      formData.append('fname', fname);
+      formData.append('lname', lname);
+      formData.append('email', email);
+      if (image) {
+        formData.append('image', image);
+      }
+
+      await updateProfile(formData);
       setIsEditing(false);
+      setImage(null);
+      setPreview(null);
       toast.success('Profile updated successfully!');
     } catch (err) {
       console.error(err);
@@ -39,13 +51,38 @@ const ProfilePage = () => {
           {/* Left Column: Avatar & Quick Info */}
           <div className="md:col-span-1">
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-8 text-center sticky top-24">
-              <div className="w-32 h-32 rounded-3xl bg-blue-600 mx-auto mb-6 flex items-center justify-center text-white text-4xl font-black shadow-xl shadow-blue-600/20">
-                {user.fname[0]}{user.lname[0]}
+              <div className="relative group mx-auto w-32 h-32 mb-6">
+                <div className="w-full h-full rounded-3xl bg-blue-600 flex items-center justify-center text-white text-4xl font-black shadow-xl shadow-blue-600/20 overflow-hidden">
+                  {preview ? (
+                    <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : user.image_url ? (
+                    <img src={`http://localhost:5000/${user.image_url}`} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{user.fname[0]}{user.lname[0]}</span>
+                  )}
+                </div>
+                {isEditing && (
+                  <label className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <Edit3 className="text-white w-8 h-8" />
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setImage(file);
+                          setPreview(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                  </label>
+                )}
               </div>
               <h2 className="text-2xl font-black dark:text-white mb-2">{user.fname} {user.lname}</h2>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-xs font-bold uppercase tracking-wider mb-8">
                 <Shield className="w-3 h-3" />
-                {user.role}
+                {user.role || 'customer'}
               </div>
 
               <div className="space-y-3 pt-8 border-t border-gray-50 dark:border-slate-800">

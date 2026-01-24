@@ -2,6 +2,7 @@ import e from "express";
 import { register, login, getCurrentUser, updateProfile } from "../controllers/auth.controller.js";
 import { addToCart, getCart, getCartCount, removeFromCart } from "../controllers/cart.controller.js";
 import { addToWishlist, getWishlist, getWishlistCount, removeFromWishlist } from "../controllers/wishlist.controller.js";
+import upload from "../config/multer.js";
 
 // Middleware
 import { verifyToken } from "../middleware/authMiddleware.js";
@@ -12,7 +13,7 @@ const router = e.Router();
 router.post('/register', register);
 router.post('/login', login);
 router.get('/me', verifyToken, getCurrentUser);
-router.put('/profile-update', verifyToken, updateProfile);
+router.put('/profile-update', verifyToken, upload.single('image'), updateProfile);
 
 // cart routes
 router.get('/cart', verifyToken, getCart)

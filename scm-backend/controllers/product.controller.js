@@ -19,7 +19,7 @@ export const getProductById = async (req, res) => {
     const { id } = req.params;
     try {
         const [product] = await db.query(`
-            SELECT p.*, v.store_name 
+            SELECT p.*, v.store_name, v.user_id AS vendor_user_id 
             FROM products p 
             LEFT JOIN vendors v ON p.vendor_id = v.id
             WHERE p.id = ?
@@ -58,8 +58,9 @@ export const createProduct = async (req, res) => {
         const images = req.files ? req.files.map(file => file.path).join(',') : ''; // Store paths comma separated or separate table
 
         // Get Vendor ID
-        const [vendor] = await db.query('SELECT id FROM vendors WHERE user_id = ?', [req.user.id]);
+        const [vendor] = await db.query('SELECT id, status FROM vendors WHERE user_id = ?', [req.user.id]);
         if (vendor.length === 0) return res.status(403).json({ message: 'Vendor profile not found' });
+        if (vendor[0].status !== 'approved') return res.status(403).json({ message: 'Store not verified. Please wait for admin approval.' });
 
         const query = `INSERT INTO products (name, description, price, stock, category, image, vendor_id) VALUES (?, ?, ?, ?, ?, ?, ?)`;
         await db.query(query, [name, description, price, stock, category, images, vendor[0].id]);
@@ -72,16 +73,63 @@ export const createProduct = async (req, res) => {
 };
 
 export const updateProduct = async (req, res) => {
-    // Implementation skipped for brevity, similar to create
-    res.status(501).json({ message: 'Not Implemented' });
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+
+        // Get vendor for current user
+        const [vendor] = await db.query('SELECT id, status FROM vendors WHERE user_id = ?', [req.user.id]);
+        if (vendor.length === 0) return res.status(403).json({ message: 'Vendor profile not found' });
+        if (vendor[0].status !== 'approved') return res.status(403).json({ message: 'Store not verified' });
+
+        // Ensure product belongs to this vendor
+        const [existing] = await db.query('SELECT * FROM products WHERE id = ? AND vendor_id = ?', [id, vendor[0].id]);
+        if (existing.length === 0) {
+            return res.status(404).json({ message: 'Product not found or unauthorized' });
+        }
+
+        // Handle images
+        if (req.files && req.files.length > 0) {
+            updates.image = req.files.map(file => file.path).join(',');
+        }
+
+        // Build dynamic query
+        const fields = [];
+        const values = [];
+        const allowedFields = ['name', 'description', 'price', 'stock', 'category', 'image'];
+
+        for (const key of allowedFields) {
+            if (updates[key] !== undefined) {
+                fields.push(`${key} = ?`);
+                values.push(updates[key]);
+            }
+        }
+
+        if (fields.length === 0) {
+            return res.json({ message: 'No changes provided' });
+        }
+
+        values.push(id);
+
+        await db.query(
+            `UPDATE products SET ${fields.join(', ')} WHERE id = ?`,
+            values
+        );
+
+        res.json({ message: 'Product updated successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
 };
 
 export const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
         // Verify ownership
-        const [vendor] = await db.query('SELECT id FROM vendors WHERE user_id = ?', [req.user.id]);
+        const [vendor] = await db.query('SELECT id, status FROM vendors WHERE user_id = ?', [req.user.id]);
         if (vendor.length === 0) return res.status(403).json({ message: 'Unauthorized' });
+        if (vendor[0].status !== 'approved') return res.status(403).json({ message: 'Store not verified' });
 
         const [product] = await db.query('SELECT * FROM products WHERE id = ? AND vendor_id = ?', [id, vendor[0].id]);
         if (product.length === 0) return res.status(404).json({ message: 'Product not found or unauthorized' });

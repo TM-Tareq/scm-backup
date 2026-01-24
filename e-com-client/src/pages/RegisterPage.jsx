@@ -12,18 +12,16 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const { login } = useAuthStore();
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      toast.error("Passwords do not match!");
       setLoading(false);
       return;
     }
@@ -46,8 +44,7 @@ const RegisterPage = () => {
       toast.success(`Welcome ${firstName} ${lastName}`);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
-      console.error(err);
+      toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -73,8 +70,6 @@ const RegisterPage = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12">
         <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-xl shadow-lg p-8 border border-gray-100 dark:border-slate-800 transition-colors">
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Create Account</h2>
-
-          {error && <p className="text-red-600 dark:text-red-400 text-center mb-4">{error}</p>}
 
           <form onSubmit={handleRegister} className="space-y-6">
             {/* First Name */}

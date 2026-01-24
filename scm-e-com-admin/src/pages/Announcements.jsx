@@ -5,22 +5,56 @@ import {
     X, Trash2, Edit2, Send, Clock,
     AlertCircle, CheckCircle, Info
 } from 'lucide-react';
+import api from '../api';
 
 const Announcements = () => {
     const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Mock data
-        setTimeout(() => {
-            setAnnouncements([
-                { id: 1, title: 'Server Maintenance Scheduled', content: 'Our servers will undergo routine maintenance this Saturday from 2 AM to 4 AM EST.', type: 'critical', status: 'Active', audience: 'All Users', date: '2026-01-20' },
-                { id: 2, title: 'New Vendor Commission Rates', content: 'Effective Feb 1st, commission rates for the Fashion category will be adjusted.', type: 'info', status: 'Scheduled', audience: 'Vendors Only', date: '2026-02-01' },
-                { id: 3, title: 'Systemwide Updates Released', content: 'We just pushed version 2.4.0 with improved dashboard analytics.', type: 'success', status: 'Sent', audience: 'All Users', date: '2026-01-18' },
-            ]);
+    const fetchAnnouncements = async () => {
+        try {
+            const res = await api.get('/admin/announcements');
+            const formatted = res.data.map(a => ({
+                id: a.id,
+                title: a.title,
+                content: a.message,
+                type: a.type,
+                status: new Date(a.end_date) < new Date() ? 'Expired' : 'Active',
+                audience: a.audience,
+                date: new Date(a.created_at).toLocaleDateString()
+            }));
+            setAnnouncements(formatted);
+        } catch (err) {
+            console.error(err);
+        } finally {
             setLoading(false);
-        }, 800);
+        }
+    };
+
+    useEffect(() => {
+        fetchAnnouncements();
     }, []);
+
+    const handleCreate = async () => {
+        const title = prompt('Enter Title:');
+        if (!title) return;
+        const message = prompt('Enter Message:');
+        const type = prompt('Enter Type (info, warning, critical, success):', 'info');
+
+        try {
+            await api.post('/admin/announcements', {
+                title,
+                message,
+                type,
+                audience: 'All Users',
+                start_date: new Date(),
+                end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days default
+            });
+            fetchAnnouncements();
+        } catch (err) {
+            alert('Failed to create announcement');
+        }
+    };
 
     const TypeBadge = ({ type }) => {
         const styles = {
@@ -36,8 +70,8 @@ const Announcements = () => {
             warning: <AlertCircle className="w-3.5 h-3.5" />
         };
         return (
-            <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${styles[type]}`}>
-                {icons[type]}
+            <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${styles[type] || styles.info}`}>
+                {icons[type] || icons.info}
                 {type}
             </span>
         );
@@ -50,7 +84,9 @@ const Announcements = () => {
                     <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Platform Announcements</h1>
                     <p className="text-slate-500 dark:text-slate-400">Broadcast important updates to your users</p>
                 </div>
-                <button className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 font-medium">
+                <button
+                    onClick={handleCreate}
+                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 font-medium">
                     <Plus className="w-4 h-4" />
                     New Announcement
                 </button>
@@ -59,10 +95,10 @@ const Announcements = () => {
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {[
-                    { label: 'Active Alerts', value: '3', color: 'text-indigo-600' },
-                    { label: 'Total Sent', value: '142', color: 'text-slate-600 dark:text-slate-300' },
-                    { label: 'Avg Open Rate', value: '68%', color: 'text-emerald-600' },
-                    { label: 'Scheduled', value: '2', color: 'text-amber-600' },
+                    { label: 'Active Alerts', value: announcements.filter(a => a.status === 'Active').length, color: 'text-indigo-600' },
+                    { label: 'Total Sent', value: announcements.length, color: 'text-slate-600 dark:text-slate-300' },
+                    { label: 'Avg Open Rate', value: 'N/A', color: 'text-emerald-600' },
+                    { label: 'Scheduled', value: '0', color: 'text-amber-600' },
                 ].map((s, i) => (
                     <div key={i} className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
                         <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{s.label}</p>
@@ -77,6 +113,8 @@ const Announcements = () => {
                     Array(3).fill(0).map((_, i) => (
                         <div key={i} className="h-24 bg-white dark:bg-slate-900 rounded-xl animate-pulse"></div>
                     ))
+                ) : announcements.length === 0 ? (
+                    <p className="text-center text-gray-500 py-10">No announcements found.</p>
                 ) : announcements.map((a) => (
                     <motion.div
                         key={a.id}
@@ -86,7 +124,8 @@ const Announcements = () => {
                     >
                         <div className="flex flex-col md:flex-row gap-6">
                             <div className={`p-4 rounded-xl shrink-0 h-fit ${a.type === 'critical' ? 'bg-red-50 text-red-500' :
-                                    a.type === 'info' ? 'bg-blue-50 text-blue-500' :
+                                a.type === 'info' ? 'bg-blue-50 text-blue-500' :
+                                    a.type === 'warning' ? 'bg-amber-50 text-amber-500' :
                                         'bg-emerald-50 text-emerald-500'
                                 }`}>
                                 <Megaphone className="w-6 h-6" />

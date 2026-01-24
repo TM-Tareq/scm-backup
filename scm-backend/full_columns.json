@@ -1,0 +1,74 @@
+[
+  {
+    "Field": "id",
+    "Type": "int",
+    "Null": "NO",
+    "Key": "PRI",
+    "Default": null,
+    "Extra": "auto_increment"
+  },
+  {
+    "Field": "user_id",
+    "Type": "int",
+    "Null": "NO",
+    "Key": "MUL",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "title",
+    "Type": "varchar(255)",
+    "Null": "NO",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "content",
+    "Type": "text",
+    "Null": "NO",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "category",
+    "Type": "varchar(100)",
+    "Null": "NO",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "product_id",
+    "Type": "int",
+    "Null": "YES",
+    "Key": "MUL",
+    "Default": null,
+    "Extra": ""
+  },
+  {
+    "Field": "status",
+    "Type": "enum('pending','accepted','rejected')",
+    "Null": "YES",
+    "Key": "",
+    "Default": "pending",
+    "Extra": ""
+  },
+  {
+    "Field": "created_at",
+    "Type": "timestamp",
+    "Null": "YES",
+    "Key": "",
+    "Default": "CURRENT_TIMESTAMP",
+    "Extra": "DEFAULT_GENERATED"
+  },
+  {
+    "Field": "image_url",
+    "Type": "text",
+    "Null": "YES",
+    "Key": "",
+    "Default": null,
+    "Extra": ""
+  }
+]

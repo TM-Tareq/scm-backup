@@ -22,6 +22,7 @@
     "@nivo/core": "^0.99.0",
     "@nivo/geo": "^0.99.0",
     "@nivo/line": "^0.99.0",
+    "@react-google-maps/api": "^2.20.8",
     "axios": "^1.13.2",
     "formik": "^2.4.9",
     "framer-motion": "^12.27.1",
@@ -32,6 +33,7 @@
     "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "^6.30.3",
     "recharts": "^3.6.0",
+    "socket.io-client": "^4.8.3",
     "zustand": "^5.0.10"
   },
   "devDependencies": {

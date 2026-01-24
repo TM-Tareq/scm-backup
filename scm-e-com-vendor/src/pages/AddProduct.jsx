@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Save, ArrowLeft, Image as ImageIcon, DollarSign, Package } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const AddProduct = () => {
     const navigate = useNavigate();
+    const { id } = useParams();
+    const isEdit = Boolean(id);
+
     const [formData, setFormData] = useState({
         name: '',
         category: '',
@@ -19,6 +22,49 @@ const AddProduct = () => {
         supplier: ''
     });
     const [images, setImages] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            if (!isEdit) return;
+            setLoading(true);
+            try {
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/products/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const product = res.data;
+                setFormData({
+                    name: product.name || '',
+                    category: product.category || '',
+                    price: product.price ?? '',
+                    stock: product.stock ?? '',
+                    description: product.description || '',
+                    supplier: product.supplier || ''
+                });
+
+                // Existing image(s)
+                if (product.image) {
+                    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
+                    const paths = String(product.image).split(',');
+                    const previews = paths.filter(p => p && p !== 'null').map((path, index) => ({
+                        preview: path.startsWith('http') ? path : `${baseUrl}/${path.replace(/^\/?/, '')}`,
+                        existing: true,
+                        id: `${product.id}-${index}`
+                    }));
+                    setImages(previews);
+                }
+            } catch (error) {
+                console.error('Failed to load product', error);
+                toast.error('Failed to load product for editing');
+                navigate('/products');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProduct();
+    }, [id, isEdit, navigate]);
 
     const onDrop = (acceptedFiles) => {
         const newImages = acceptedFiles.map(file => Object.assign(file, {
@@ -52,24 +98,38 @@ const AddProduct = () => {
         formDataPayload.append('description', formData.description);
         formDataPayload.append('supplier', formData.supplier);
 
+        // Only append new File objects, not existing preview-only entries
         images.forEach((image) => {
-            formDataPayload.append('images', image);
+            if (image instanceof File || image.lastModified) {
+                formDataPayload.append('images', image);
+            }
         });
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/products`, formDataPayload, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+            const baseUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/products`;
+            if (isEdit) {
+                await axios.put(`${baseUrl}/${id}`, formDataPayload, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                toast.success("Product updated successfully!");
+            } else {
+                await axios.post(baseUrl, formDataPayload, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                toast.success("Product created successfully!");
+            }
 
-            toast.success("Product Created Successfully!");
             navigate('/products');
         } catch (error) {
-            console.error("Failed to create product", error);
-            toast.error(error.response?.data?.message || "Failed to create product");
+            console.error("Failed to save product", error);
+            toast.error(error.response?.data?.message || "Failed to save product");
         }
     };
 
@@ -89,8 +149,14 @@ const AddProduct = () => {
                         <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-400" />
                     </Link>
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Add New Product</h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">Fill in the details below to add a new product to your inventory</p>
+                        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+                            {isEdit ? 'Edit Product' : 'Add New Product'}
+                        </h1>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1">
+                            {isEdit
+                                ? 'Update the details below to modify your product'
+                                : 'Fill in the details below to add a new product to your inventory'}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -250,8 +316,8 @@ const AddProduct = () => {
                         <div
                             {...getRootProps()}
                             className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition ${isDragActive
-                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                    : 'border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                : 'border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
                                 }`}
                         >
                             <input {...getInputProps()} />

@@ -8,9 +8,12 @@ import {
     TrendingUp, TrendingDown, Users, ShoppingBag,
     DollarSign, ArrowUpRight, Calendar, Download
 } from 'lucide-react';
+import api from '../api';
+import toast from 'react-hot-toast';
 
 const Analytics = () => {
     const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState(null);
 
     const revenueData = [
         { name: 'Mon', revenue: 4500, orders: 120 },
@@ -31,7 +34,17 @@ const Analytics = () => {
     ];
 
     useEffect(() => {
-        setTimeout(() => setLoading(false), 800);
+        const fetchStats = async () => {
+            try {
+                const res = await api.get('/admin/analytics');
+                setStats(res.data);
+            } catch (err) {
+                toast.error('Failed to load real-time analytics');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStats();
     }, []);
 
     const StatCard = ({ label, value, trend, icon: Icon, color, delay }) => (
@@ -78,10 +91,38 @@ const Analytics = () => {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <StatCard label="Total Revenue" value="$45,678" trend={12.5} icon={DollarSign} color="text-indigo-600" delay={0.1} />
-                <StatCard label="Total Orders" value="1,234" trend={8.2} icon={ShoppingBag} color="text-blue-600" delay={0.2} />
-                <StatCard label="Active Vendors" value="56" trend={2.4} icon={TrendingUp} color="text-emerald-600" delay={0.3} />
-                <StatCard label="New Users" value="284" trend={-5.1} icon={Users} color="text-amber-600" delay={0.4} />
+                <StatCard
+                    label="Total Revenue"
+                    value={loading ? '...' : `$${Number(stats?.revenue || 0).toLocaleString()}`}
+                    trend={stats?.trends?.revenue || 0}
+                    icon={DollarSign}
+                    color="text-indigo-600"
+                    delay={0.1}
+                />
+                <StatCard
+                    label="Total Orders"
+                    value={loading ? '...' : stats?.orders?.toLocaleString()}
+                    trend={stats?.trends?.orders || 0}
+                    icon={ShoppingBag}
+                    color="text-blue-600"
+                    delay={0.2}
+                />
+                <StatCard
+                    label="Active Vendors"
+                    value={loading ? '...' : stats?.vendors?.toLocaleString()}
+                    trend={stats?.trends?.vendors || 0}
+                    icon={TrendingUp}
+                    color="text-emerald-600"
+                    delay={0.3}
+                />
+                <StatCard
+                    label="Registered Users"
+                    value={loading ? '...' : stats?.users?.toLocaleString()}
+                    trend={stats?.trends?.users || 0}
+                    icon={Users}
+                    color="text-amber-600"
+                    delay={0.4}
+                />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

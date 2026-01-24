@@ -3,6 +3,7 @@ import { Search, Send, User, MessageSquare, ShieldCheck, Clock } from 'lucide-re
 import api from '../api';
 import useAuthStore from '../store/useAuthStore';
 import toast from 'react-hot-toast';
+import { socket } from '../utils/socket';
 
 const Messages = () => {
     const { user } = useAuthStore();
@@ -10,20 +11,78 @@ const Messages = () => {
     const [selectedChat, setSelectedChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
     const [loading, setLoading] = useState(true);
     const scrollRef = useRef();
 
     useEffect(() => {
         fetchChatList();
-    }, []);
 
-    useEffect(() => {
-        if (selectedChat) {
-            fetchMessages();
-            const interval = setInterval(fetchMessages, 5000);
-            return () => clearInterval(interval);
+        // Ensure socket is connected (global manager handles connection)
+        if (!socket.connected) {
+            socket.connect();
         }
-    }, [selectedChat]);
+        socket.emit('chat:join', user.id);
+
+        console.log(`🔌 Vendor Messages page: Listening for chat updates`);
+
+        // Listen for incoming messages
+        const handleReceive = (data) => {
+            console.log('📨 Vendor received message:', data, 'selectedChat:', selectedChat?.id);
+            // Normalize IDs for comparison
+            const normalizedSenderId = parseInt(data.senderId);
+            const normalizedReceiverId = parseInt(data.receiverId);
+            const normalizedSelectedId = selectedChat ? parseInt(selectedChat.id) : null;
+            const currentUserId = parseInt(user.id);
+
+            // Only add if it's relevant to the selected chat (from user OR to user)
+            const isFromSelectedUser = normalizedSenderId === normalizedSelectedId;
+            const isToSelectedUser = normalizedSenderId === currentUserId && normalizedReceiverId === normalizedSelectedId;
+
+            if (selectedChat && (isFromSelectedUser || isToSelectedUser)) {
+                console.log('✅ Message matches selected chat, adding');
+                setMessages(prev => {
+                    // Avoid duplicates
+                    const exists = prev.some(m =>
+                        parseInt(m.sender_id) === normalizedSenderId &&
+                        m.message === data.message &&
+                        Math.abs(new Date(m.created_at) - new Date(data.timestamp || new Date())) < 2000
+                    );
+                    if (exists) {
+                        console.log('⚠️ Duplicate message detected, skipping');
+                        return prev;
+                    }
+                    console.log('➕ Adding new message to chat');
+                    return [...prev, {
+                        sender_id: normalizedSenderId,
+                        message: data.message,
+                        created_at: data.timestamp || new Date()
+                    }];
+                });
+            } else {
+                console.log('❌ Message not from selected chat, ignoring');
+            }
+            // Always refresh chat list to update unread counts
+            fetchChatList();
+        };
+
+        socket.on('chat:receive', handleReceive);
+
+        // Don't listen to notifications here - global manager handles that
+        // But refresh chat list when messages arrive
+
+        socket.on('chat:typing', (data) => {
+            if (selectedChat && (data.senderId === selectedChat.id || data.senderId === parseInt(selectedChat.id))) {
+                setIsTyping(data.isTyping);
+            }
+        });
+
+        return () => {
+            socket.off('chat:receive', handleReceive);
+            socket.off('chat:typing');
+            // DON'T disconnect - global manager handles that
+        };
+    }, [selectedChat, user]);
 
     useEffect(() => {
         scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -43,22 +102,59 @@ const Messages = () => {
     const fetchMessages = async () => {
         if (!selectedChat) return;
         try {
+            console.log(`📬 Vendor fetching messages with User ${selectedChat.id}`);
             const response = await api.get(`/chat/messages/${selectedChat.id}`);
+            console.log(`✅ Loaded ${response.data.length} messages`);
             setMessages(response.data);
         } catch (err) {
             console.error('Fetch messages failed', err);
+            toast.error('Failed to load messages');
         }
     };
+
+    useEffect(() => {
+        if (selectedChat) {
+            fetchMessages();
+        }
+    }, [selectedChat]);
 
     const handleSend = async (e) => {
         e.preventDefault();
         if (!newMessage.trim() || !selectedChat) return;
 
         try {
+            const messageData = {
+                receiverId: selectedChat.id,
+                message: newMessage,
+                senderId: user.id,
+                senderName: user.fname
+            };
+
+            console.log('📤 Vendor sending message:', messageData);
+
+            // Send via API (backend will emit socket event)
             await api.post('/chat/send', { receiverId: selectedChat.id, message: newMessage });
+
+            // Optimistically add message to UI
+            setMessages(prev => {
+                const newMsg = {
+                    sender_id: user.id,
+                    message: newMessage,
+                    created_at: new Date()
+                };
+                // Avoid duplicates
+                const exists = prev.some(m =>
+                    m.sender_id === newMsg.sender_id &&
+                    m.message === newMsg.message &&
+                    Math.abs(new Date(m.created_at) - new Date(newMsg.created_at)) < 2000
+                );
+                return exists ? prev : [...prev, newMsg];
+            });
+
             setNewMessage('');
-            fetchMessages();
+            toast.success('Message sent!');
         } catch (err) {
+            console.error('Send message error:', err);
             toast.error('Failed to send message');
         }
     };
@@ -158,7 +254,7 @@ const Messages = () => {
                                 <div key={i} className={`flex flex-col ${msg.sender_id === user.id ? 'items-end' : 'items-start'}`}>
                                     <div className={`max-w-[70%] p-6 rounded-3xl text-sm font-medium leading-relaxed ${msg.sender_id === user.id
                                         ? 'bg-blue-600 text-white rounded-br-none shadow-2xl shadow-blue-600/30 font-bold'
-                                        : 'bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200 rounded-bl-none shadow-sm border border-gray-100 dark:border-slate-800'
+                                        : 'bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-200 rounded-bl-none shadow-sm border border-gray-100 dark:border-slate-800'
                                         }`}>
                                         {msg.message}
                                     </div>

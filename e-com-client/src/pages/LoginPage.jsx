@@ -10,7 +10,6 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const { login } = useAuthStore();
   const navigate = useNavigate();
@@ -18,7 +17,6 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       const response = await api.post('/auth/login', { email, password });
@@ -31,12 +29,9 @@ const LoginPage = () => {
       navigate('/');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed');
-      console.error(err);
     } finally {
       setLoading(false);
     }
-
-    // navigate('/');
   };
 
   return (
@@ -59,8 +54,6 @@ const LoginPage = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12">
         <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-xl shadow-lg p-8 border border-gray-100 dark:border-slate-800 transition-colors">
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Login to MyShop</h2>
-
-          {error && <p className="text-red-600 dark:text-red-400 text-center mb-4">{error}</p>}
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>

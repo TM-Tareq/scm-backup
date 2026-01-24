@@ -17,7 +17,10 @@ const useAuthStore = create(
             },
             updateProfile: async (updateData) => {
                 try {
-                    const response = await api.put('/auth/profile-update', updateData);
+                    const isFormData = updateData instanceof FormData;
+                    const response = await api.put('/auth/profile-update', updateData, {
+                        headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {}
+                    });
                     set({ user: response.data.user });
                 } catch (err) {
                     console.error('Update profile failed', err);
@@ -40,7 +43,7 @@ const useAuthStore = create(
                     console.error(err);
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
-                    set({ loading: false });
+                    set({ user: null, token: null, loading: false });
                 }
             },
         }),

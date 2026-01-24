@@ -1,8 +1,19 @@
-import { Bell, Search, User, Moon, Sun } from 'lucide-react';
+import { Bell, Search, User, Moon, Sun, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import useThemeStore from '../../store/useThemeStore';
+import { useAuth } from '../../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 const AdminTopbar = ({ userName = "Admin User" }) => {
     const { isDarkMode, toggleDarkMode } = useThemeStore();
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        toast.success('Logged out successfully');
+        navigate('/login');
+    };
 
     return (
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 px-8 py-4 sticky top-0 z-40 transition-all">
@@ -48,6 +59,13 @@ const AdminTopbar = ({ userName = "Admin User" }) => {
                         <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
                             <User className="h-5 w-5 text-white" />
                         </div>
+                        <button
+                            onClick={handleLogout}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                            title="Logout"
+                        >
+                            <LogOut className="h-5 w-5" />
+                        </button>
                     </div>
                 </div>
             </div>

@@ -5,11 +5,11 @@ import upload from '../config/multer.js';
 
 const router = express.Router();
 
-router.get('/', getAllProducts);
-router.get('/:id', getProductById);
-
 // Vendor Routes
 router.get('/vendor/all', verifyToken, authorizeRole('vendor'), getVendorProducts);
+
+router.get('/', getAllProducts);
+router.get('/:id', getProductById);
 router.post('/', verifyToken, authorizeRole('vendor'), upload.array('images', 5), createProduct);
 router.put('/:id', verifyToken, authorizeRole('vendor'), upload.array('images', 5), updateProduct);
 router.delete('/:id', verifyToken, authorizeRole('vendor'), deleteProduct);

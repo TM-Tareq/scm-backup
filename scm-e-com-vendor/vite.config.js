@@ -7,4 +7,10 @@ export default defineConfig({
   server: {
     port: 5174,
   },
+  resolve: {
+    dedupe: ['zustand']
+  },
+  optimizeDeps: {
+    include: ['zustand']
+  }
 })

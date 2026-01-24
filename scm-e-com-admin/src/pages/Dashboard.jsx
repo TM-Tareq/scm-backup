@@ -1,23 +1,101 @@
+import { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
 import { motion } from 'framer-motion';
-import { DollarSign, Store, ShoppingCart, Users, TrendingUp, Download } from 'lucide-react';
+import { DollarSign, Store, ShoppingCart, Users, TrendingUp, Download, Loader2 } from 'lucide-react';
 import StatsCard from '../components/dashboard/StatsCard';
 import SalesOverviewChart from '../components/dashboard/SalesOverviewChart';
+import api from '../api';
+import toast from 'react-hot-toast';
 
 const Dashboard = () => {
-    // Mock data - will be replaced with API calls
-    const stats = {
-        totalRevenue: 124500,
-        activeVendors: 45,
-        totalOrders: 1234,
-        totalUsers: 5678,
+    const [stats, setStats] = useState(null);
+    const [activities, setActivities] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchData = async () => {
+        try {
+            const [analyticsRes, logsRes] = await Promise.all([
+                api.get('/admin/analytics'),
+                api.get('/admin/audit-logs')
+            ]);
+
+            setStats({
+                totalRevenue: analyticsRes.data.revenue || 0,
+                activeVendors: analyticsRes.data.vendors || 0,
+                totalOrders: analyticsRes.data.orders || 0,
+                totalUsers: analyticsRes.data.users || 0,
+                totalProducts: analyticsRes.data.products || 0,
+            });
+
+            // Map audit logs to activity display format
+            const mappedActivities = logsRes.data.slice(0, 5).map(log => ({
+                id: log.id,
+                user: `${log.fname} ${log.lname}`,
+                action: log.action.replace(/_/g, ' ').toLowerCase(),
+                resource: log.resource,
+                time: new Date(log.created_at).toLocaleString(),
+                type: log.resource.toLowerCase()
+            }));
+            setActivities(mappedActivities);
+
+        } catch (err) {
+            console.error('Failed to load dashboard data', err);
+            toast.error('Failed to load dashboard data');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const recentActivities = [
-        { id: 1, user: 'Admin', action: 'Approved vendor TechStore', time: '5 min ago', type: 'vendor' },
-        { id: 2, user: 'Editor John', action: 'Updated FAQ #12', time: '12 min ago', type: 'content' },
-        { id: 3, user: 'Admin', action: 'Set commission rate to 8%', time: '1 hour ago', type: 'finance' },
-        { id: 4, user: 'Editor Sarah', action: 'Suspended user @badactor', time: '2 hours ago', type: 'moderation' },
-    ];
+    useEffect(() => {
+        fetchData();
+
+        // Connect to Socket.io
+        const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
+
+        socket.on('connect', () => {
+            // WebSocket connected
+        });
+
+        // Real-time Order Updates
+        socket.on('order:new', (data) => {
+            toast.success(`New order received: $${data.totalPrice}`);
+            setStats(prev => ({
+                ...prev,
+                totalOrders: (prev?.totalOrders || 0) + 1,
+                totalRevenue: (prev?.totalRevenue || 0) + parseFloat(data.totalPrice)
+            }));
+
+            // Add to recent activity locally for instant feedback
+            const newActivity = {
+                id: Date.now(),
+                user: data.customer || 'Customer',
+                action: 'created',
+                resource: 'order',
+                time: new Date().toLocaleString(),
+                type: 'finance'
+            };
+            setActivities(prev => [newActivity, ...prev].slice(0, 5));
+        });
+
+        // Real-time Shipment Updates
+        socket.on('shipment:update', (data) => {
+            toast(`Shipment ${data.trackingCode} is now ${data.status.replace(/_/g, ' ')}`, {
+                icon: '🚚'
+            });
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, []);
+
+    if (loading && !stats) {
+        return (
+            <div className="flex items-center justify-center h-full min-h-[400px]">
+                <Loader2 className="w-12 h-12 text-indigo-600 animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -48,7 +126,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatsCard
                     title="Total Revenue"
-                    value={`$${stats.totalRevenue.toLocaleString()}`}
+                    value={`$${(stats?.totalRevenue || 0).toLocaleString()}`}
                     icon={DollarSign}
                     trend="up"
                     trendValue="+12.5%"
@@ -57,7 +135,7 @@ const Dashboard = () => {
                 />
                 <StatsCard
                     title="Active Vendors"
-                    value={stats.activeVendors}
+                    value={stats?.activeVendors || 0}
                     icon={Store}
                     trend="up"
                     trendValue="+5"
@@ -66,7 +144,7 @@ const Dashboard = () => {
                 />
                 <StatsCard
                     title="Total Orders"
-                    value={stats.totalOrders.toLocaleString()}
+                    value={(stats?.totalOrders || 0).toLocaleString()}
                     icon={ShoppingCart}
                     trend="up"
                     trendValue="+8.2%"
@@ -75,7 +153,7 @@ const Dashboard = () => {
                 />
                 <StatsCard
                     title="Total Users"
-                    value={stats.totalUsers.toLocaleString()}
+                    value={(stats?.totalUsers || 0).toLocaleString()}
                     icon={Users}
                     trend="up"
                     trendValue="+15.3%"
@@ -115,7 +193,7 @@ const Dashboard = () => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Recent Activity</h3>
                     <div className="space-y-4">
-                        {recentActivities.map((activity, index) => (
+                        {activities.length > 0 ? activities.map((activity, index) => (
                             <motion.div
                                 key={activity.id}
                                 initial={{ opacity: 0, x: 20 }}
@@ -124,12 +202,14 @@ const Dashboard = () => {
                                 className="flex items-start gap-3 pb-4 border-b border-gray-100 dark:border-slate-800 last:border-0 last:pb-0 transition-colors"
                             >
                                 <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${activity.type === 'finance' ? 'bg-blue-500' :
-                                        activity.type === 'vendor' ? 'bg-emerald-500' :
-                                            activity.type === 'moderation' ? 'bg-red-500' :
-                                                'bg-amber-500'
+                                    activity.type === 'vendors' ? 'bg-emerald-500' :
+                                        activity.type === 'users' ? 'bg-red-500' :
+                                            'bg-amber-500'
                                     }`}></div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">{activity.action}</p>
+                                    <p className="text-sm text-gray-800 dark:text-gray-200 font-medium capitalize">
+                                        {activity.action} - {activity.resource}
+                                    </p>
                                     <div className="flex items-center gap-2 mt-1">
                                         <p className="text-xs text-gray-500 dark:text-gray-400">{activity.user}</p>
                                         <span className="text-xs text-gray-300 dark:text-gray-600">•</span>
@@ -137,7 +217,9 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             </motion.div>
-                        ))}
+                        )) : (
+                            <p className="text-sm text-gray-500 italic">No recent activity detected.</p>
+                        )}
                     </div>
                 </motion.div>
             </div>
@@ -150,9 +232,9 @@ const Dashboard = () => {
                     transition={{ delay: 0.8 }}
                     className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors"
                 >
-                    <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Pending Payouts</h4>
-                    <p className="text-2xl font-bold text-gray-800 dark:text-white mb-1">$12,450</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">To 8 vendors</p>
+                    <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Total Products</h4>
+                    <p className="text-2xl font-bold text-gray-800 dark:text-white mb-1">{(stats?.totalProducts || 0).toLocaleString()}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Across all categories</p>
                 </motion.div>
 
                 <motion.div
@@ -174,7 +256,7 @@ const Dashboard = () => {
                 >
                     <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Active Carriers</h4>
                     <p className="text-2xl font-bold text-gray-800 dark:text-white mb-1">5</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">FedEx, DHL, UPS, USPS, Local</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Real-time tracking enabled</p>
                 </motion.div>
             </div>
         </div>
@@ -182,3 +264,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, Search, Filter } from 'lucide-react';
-import useAuthStore from '../store/useAuthStore';
-import axios from 'axios';
+import api from '../api';
+import toast from 'react-hot-toast';
 
 const Orders = () => {
     const [orders, setOrders] = useState([]);
@@ -9,34 +9,35 @@ const Orders = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
-    useEffect(() => {
-        // Mock API call - in real app would verify if these are vendor specific
-        const fetchOrders = async () => {
-            try {
-                // const res = await axios.get('http://localhost:5000/api/vendor/orders');
-                // setOrders(res.data);
+    const fetchOrders = async () => {
+        try {
+            const res = await api.get('/orders/vendor/all');
+            const formatted = res.data.map(order => ({
+                id: `#ORD-${order.order_id}`,
+                date: new Date(order.created_at).toLocaleDateString(),
+                customer: `${order.fname} ${order.lname}`,
+                total: `$${parseFloat(order.sub_total).toLocaleString()}`,
+                status: order.status.charAt(0).toUpperCase() + order.status.slice(1),
+                items: 'View Details', // We don't have item count in sub_orders list query currently
+                rawId: order.order_id
+            }));
+            setOrders(formatted);
+        } catch (error) {
+            console.error("Failed to fetch orders", error);
+            toast.error("Failed to load orders");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-                // Mock Data
-                setTimeout(() => {
-                    setOrders([
-                        { id: '#ORD-7782', date: 'Oct 24, 2023', customer: 'Alex Thompson', total: '$129.99', status: 'Pending', items: 2 },
-                        { id: '#ORD-7783', date: 'Oct 24, 2023', customer: 'Sarah Miller', total: '$89.50', status: 'Processing', items: 1 },
-                        { id: '#ORD-7784', date: 'Oct 23, 2023', customer: 'Michael Chen', total: '$245.00', status: 'Completed', items: 3 },
-                        { id: '#ORD-7785', date: 'Oct 23, 2023', customer: 'Jessica Davis', total: '$35.00', status: 'Cancelled', items: 1 },
-                    ]);
-                    setLoading(false);
-                }, 800);
-            } catch (error) {
-                console.error("Failed to fetch orders");
-                setLoading(false);
-            }
-        };
+    useEffect(() => {
         fetchOrders();
     }, []);
 
     const getStatusColor = (status) => {
         switch (status.toLowerCase()) {
-            case 'completed': return 'bg-green-100 text-green-800';
+            case 'completed':
+            case 'delivered': return 'bg-green-100 text-green-800';
             case 'processing': return 'bg-blue-100 text-blue-800';
             case 'pending': return 'bg-yellow-100 text-yellow-800';
             case 'cancelled': return 'bg-red-100 text-red-800';
@@ -44,9 +45,16 @@ const Orders = () => {
         }
     };
 
+    const filteredOrders = orders.filter(order => {
+        const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.customer.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || order.status.toLowerCase() === statusFilter.toLowerCase();
+        return matchesSearch && matchesStatus;
+    });
+
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Orders</h2>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white uppercase tracking-tight">Supply Chain Orders</h2>
 
             {/* Filters */}
             <div className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-wrap gap-4 items-center justify-between transition-colors">
@@ -61,10 +69,6 @@ const Orders = () => {
                     />
                 </div>
                 <div className="flex gap-4">
-                    <div className="flex items-center gap-2">
-                        <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                        <span className="text-sm text-gray-500 dark:text-gray-400">Filter by:</span>
-                    </div>
                     <select
                         className="p-2 border border-gray-200 dark:border-slate-700 rounded-lg outline-none cursor-pointer bg-white dark:bg-slate-800 text-gray-900 dark:text-white transition-colors"
                         value={statusFilter}
@@ -85,34 +89,36 @@ const Orders = () => {
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
                         <thead className="bg-gray-50 dark:bg-slate-800/50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order ID</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Items</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
+                                <th className="px-6 py-3 text-left text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Order ID</th>
+                                <th className="px-6 py-3 text-left text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Deployment Date</th>
+                                <th className="px-6 py-3 text-left text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Client Name</th>
+                                <th className="px-6 py-3 text-left text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Net Value</th>
+                                <th className="px-6 py-3 text-left text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Status</th>
+                                <th className="px-6 py-3 text-right text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Operations</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-800">
                             {loading ? (
                                 <tr>
-                                    <td colSpan="7" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Loading orders...</td>
+                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400 italic">Syncing with supply chain...</td>
                                 </tr>
-                            ) : orders.map((order) => (
-                                <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">{order.id}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{order.date}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{order.customer}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{order.total}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">{order.items}</td>
+                            ) : filteredOrders.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400 italic">No orders found matching criteria.</td>
+                                </tr>
+                            ) : filteredOrders.map((order) => (
+                                <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition group">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-black text-blue-600 dark:text-blue-400">{order.id}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-medium">{order.date}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tighter">{order.customer}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-black text-gray-900 dark:text-white">{order.total}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)} dark:bg-opacity-20`}>
+                                        <span className={`px-2 inline-flex text-[10px] font-black uppercase tracking-widest rounded-md ${getStatusColor(order.status)} dark:bg-opacity-20`}>
                                             {order.status}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                        <button className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition bg-gray-50 dark:bg-slate-800 p-2 rounded-lg">
                                             <Eye className="w-5 h-5" />
                                         </button>
                                     </td>
@@ -127,3 +133,4 @@ const Orders = () => {
 };
 
 export default Orders;
+

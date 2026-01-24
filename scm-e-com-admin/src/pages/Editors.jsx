@@ -49,6 +49,27 @@ const Editors = () => {
         e.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const [showModal, setShowModal] = useState(false);
+    const [formData, setFormData] = useState({
+        fname: '',
+        lname: '',
+        email: '',
+        password: ''
+    });
+
+    const handleAddEditor = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/admin/add-editor', formData);
+            toast.success('Editor authorized successfully');
+            setShowModal(false);
+            setFormData({ fname: '', lname: '', email: '', password: '' });
+            fetchEditors();
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to add editor');
+        }
+    };
+
     return (
         <div className="p-10 space-y-10">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -60,7 +81,7 @@ const Editors = () => {
                 </div>
                 <button
                     className="flex items-center gap-3 px-8 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition shadow-xl shadow-blue-600/20 uppercase tracking-widest text-xs active:scale-95"
-                    onClick={() => toast.success('To authorize new staff, elevate a user role in the Intelligence section.')}
+                    onClick={() => setShowModal(true)}
                 >
                     <UserPlus className="w-5 h-5" /> Authorize Personnel
                 </button>
@@ -163,6 +184,74 @@ const Editors = () => {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Add Editor Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 w-full max-w-md shadow-2xl border border-gray-100 dark:border-slate-800 animate-fade-in mx-4">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-black dark:text-white flex items-center gap-3">
+                                <UserPlus className="text-blue-600" /> New Personnel
+                            </h2>
+                            <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <XCircle size={24} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleAddEditor} className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">First Name</label>
+                                    <input
+                                        required
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
+                                        value={formData.fname}
+                                        onChange={e => setFormData({ ...formData, fname: e.target.value })}
+                                        placeholder="John"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Last Name</label>
+                                    <input
+                                        required
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
+                                        value={formData.lname}
+                                        onChange={e => setFormData({ ...formData, lname: e.target.value })}
+                                        placeholder="Doe"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Email Address</label>
+                                <input
+                                    type="email"
+                                    required
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
+                                    value={formData.email}
+                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                    placeholder="editor@company.com"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
+                                    value={formData.password}
+                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full py-4 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-700 transition uppercase tracking-widest text-xs mt-4 shadow-lg shadow-blue-600/30"
+                            >
+                                Authorize Access
+                            </button>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>

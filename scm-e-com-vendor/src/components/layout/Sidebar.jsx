@@ -7,11 +7,20 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import useAuthStore from '../../store/useAuthStore';
+import { useEffect } from 'react';
+import useChatStore from '../../store/useChatStore';
 
 const Sidebar = () => {
     const [collapsed, setCollapsed] = useState(false);
     const logout = useAuthStore((state) => state.logout);
+    const user = useAuthStore((state) => state.user);
+    const unreadCount = useChatStore((state) => state.unreadCount);
+    const refreshUnreadCount = useChatStore((state) => state.refreshUnreadCount);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) refreshUnreadCount();
+    }, [user]);
 
     const menuItems = [
         { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -82,6 +91,12 @@ const Sidebar = () => {
                                 </motion.span>
                             )}
                         </AnimatePresence>
+
+                        {item.path === '/messages' && unreadCount > 0 && (
+                            <span className="ml-auto min-w-6 h-6 px-2 bg-blue-600 text-white text-[11px] font-black rounded-full flex items-center justify-center shadow-lg shadow-blue-600/20">
+                                {unreadCount > 99 ? '99+' : unreadCount}
+                            </span>
+                        )}
 
                         {/* Hover Tooltip for collapsed state */}
                         {collapsed && (
